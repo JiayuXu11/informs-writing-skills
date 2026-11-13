@@ -4,14 +4,22 @@ Use this reference when choosing titles, structuring sections across different O
 
 ---
 
-## 1. Title Craft (Cochrane / INFORMS Precision)
+## 1. Title, Sentence-by-Sentence Abstract & Intro Length Calibration
 
+### Title Craft (Cochrane / INFORMS Precision)
 - Keep titles concise (**<= 12 words** ideal, `<= 15` upper bound) and informative to an adjacent-subfield scholar in one glance.
 - **Name Object + Lever/Mechanism + Setting/Outcome**, not methodology fluff:
   - *Empirical / Field*: `"Delayed Price Updates and Demand Estimation: Evidence from Retail Analytics"` or `"The Impact of [Lever] on [Outcome]: Evidence from [Setting]"`.
   - *Theory / Applied OR*: `"Adaptive Assortment Optimization Under Censored Demand"` or `"Unit Commitment Without Commitment"`.
   - *Computational / IJOC*: `"Branch-and-Price for Multi-Compartment Vehicle Routing with Stochastic Demands"`.
 - **Avoid**: `"A Study on..."`, `"On Various Factors..."`, `"An Empirical Investigation of..."`, or method-only labels (`"A Difference-in-Differences Analysis of..."`) unless inventing the estimator itself.
+
+### Sentence-by-Sentence Abstract Craft
+- Treat the exemplar's Abstract as a **sentence-by-sentence blueprint (`S1 -> S2 -> ... -> Sk`)**: match each sentence's argumentative job, verb calibration, and tight pacing (`5–7` sentences total: `S1` setting/tension -> `S2` bottleneck/gap -> `S3` central model/design -> `S4` headline mechanism/theorem -> `S5` benchmarked magnitude -> `S6` regime boundary/implication), with **zero** math symbols/equations and **zero** citations.
+
+### Abstract & Introduction Word-Count Parity
+- Calibrate both Abstract length (`~150–210` words within target-journal caps) and Introduction length (`~1,100–1,800` words across `8–12` paragraphs) within **`+/-15%--20%`** of your target-journal exemplar benchmarks.
+- Avoid two symmetric defects: (a) a stunted 400–600-word Introduction that merely repeats the Abstract without institutional friction, positioning, or roadmap; and (b) a 2,600+ word Introduction that drifts into a mini-textbook and steals page budget from core theorems and tables. Maintain a balanced Abstract-to-Intro word ratio (`~1:6` to `1:11`).
 
 ---
 

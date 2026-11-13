@@ -10,8 +10,8 @@ Unified `informs4` LaTeX writing, anti-AI prose surgery, referee calibration, an
 
 | Skill | Language | Core Capabilities |
 | :--- | :--- | :--- |
-| **`informs-writing`** | Pure English | `0 -> 1` exemplar-guided drafting (arXiv/SSRN/top-journal PDFs), anti-AI prose surgery & 4-pass editing, hard-blocking static quality gates, unified `informs4` LaTeX + 100% Unified Online Appendix (`\ECSwitch`), 4-journal deltas, referee calibration |
-| **`informs-zh-review`** | EN + ZH | Main-text-only EN -> ZH LaTeX/XeLaTeX PDF generation (omits Online Appendix derivations for rapid reading) + bidirectional PDF annotation extraction & synchronized Git-tracked edits back to both `.tex` files |
+| **`informs-writing`** | Pure English | `0 -> 1` exemplar-guided drafting (sentence-by-sentence Abstract imitation, Abstract/Intro word-count parity `+/-15%--20%`, arXiv/SSRN/top-journal PDFs), anti-AI prose surgery & 4-pass editing, publication-grade table/figure aesthetics (`visual-design-and-pdf-qa.md`), hard-blocking source + compiled-PDF visual QA gates, unified `informs4` LaTeX + 100% Unified Online Appendix (`\ECSwitch`), 4-journal deltas, referee calibration |
+| **`informs-zh-review`** | EN + ZH | Main-text-only EN -> ZH LaTeX/XeLaTeX PDF generation (with visual PDF layout inspection) + bidirectional PDF annotation extraction & synchronized Git-tracked edits back to both `.tex` files |
 
 ---
 
@@ -51,11 +51,14 @@ python informs-writing/scripts/audit_informs_draft.py path/to/main.tex --journal
 # 2. Paragraph craft, evidence-verb calibration, and rhythm/burstiness check
 python informs-writing/scripts/check_prose_craft.py path/to/section.tex --section intro --strict
 
-# 3. Cross-section contract drift & Unified Online Appendix placement helper
-python informs-writing/scripts/audit_manuscript_contract.py path/to/main.tex --journal opre
+# 3. Cross-section contract drift, Abstract/Intro length parity & Unified Online Appendix placement
+python informs-writing/scripts/audit_manuscript_contract.py path/to/main.tex --journal opre --exemplar-abstract-words 180 --exemplar-intro-words 1450
 python informs-writing/scripts/audit_manuscript_contract.py --place-results items.txt --journal ijoc
 
-# 4. Run full automated unit test suite
+# 4. Compiled-PDF visual layout, whitespace, overlap & glyph integrity audit
+python informs-writing/scripts/check_pdf_layout.py path/to/main.pdf --render-flagged /tmp/pdf_qa
+
+# 5. Run full automated unit test suite
 python informs-writing/tests/test_informs_skills.py -v
 ```
 

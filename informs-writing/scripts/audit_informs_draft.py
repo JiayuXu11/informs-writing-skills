@@ -855,6 +855,47 @@ def audit_prose_patterns(main_body: str, journal: str) -> list[Finding]:
     return findings
 
 
+def audit_visual_layout_hazards(main_body: str) -> list[Finding]:
+    """Warn on LaTeX float/scaling/spacing habits that distort compiled PDFs."""
+    findings: list[Finding] = []
+    for m in re.finditer(
+        r"\\begin\{(table\*?|figure\*?|algorithm\*?|algorithm2e)\}\s*\[(h|H|!h)\]",
+        main_body,
+    ):
+        findings.append(
+            Finding(
+                "WARN",
+                "FloatPlacement",
+                line_of_offset(main_body, m.start()),
+                f"Restrictive float specifier '[{m.group(2)}]' on {m.group(1)} often triggers large mid-page whitespace gaps; prefer '[tbp]' or '[htbp]'.",
+            )
+        )
+
+    for m in re.finditer(
+        r"\\resizebox\s*\{[^}]*\}\s*\{[^}]*\}\s*\{\s*\\begin\{tabular",
+        main_body,
+    ):
+        findings.append(
+            Finding(
+                "WARN",
+                "TableScaling",
+                line_of_offset(main_body, m.start()),
+                "Blind \\resizebox scaling around tabular shrinks fonts unevenly; trim headers, adjust \\tabcolsep, or use \\small/\\footnotesize instead.",
+            )
+        )
+
+    for m in re.finditer(r"\\vspace\*?\s*\{\s*-[^}]+\}", main_body):
+        findings.append(
+            Finding(
+                "WARN",
+                "NegativeVspace",
+                line_of_offset(main_body, m.start()),
+                f"Negative vertical spacing '{m.group(0)}' frequently causes overlapping text or float collisions in compiled PDFs.",
+            )
+        )
+    return findings
+
+
 def audit_manuscript(text: str, journal: str = "mnsc") -> list[Finding]:
     clean = strip_latex_comments(text)
     main_body, _ec = split_at_ec_switch(clean)
@@ -865,6 +906,7 @@ def audit_manuscript(text: str, journal: str = "mnsc") -> list[Finding]:
     findings.extend(audit_appendix_policy(clean, main_body))
     findings.extend(audit_equation_hygiene(clean, main_body))
     findings.extend(audit_table_hygiene(main_body))
+    findings.extend(audit_visual_layout_hazards(main_body))
     findings.extend(audit_orphan_symbols(main_body))
     findings.extend(audit_definition_discipline(main_body))
     findings.extend(audit_prose_patterns(main_body, journal))

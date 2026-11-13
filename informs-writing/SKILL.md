@@ -24,6 +24,7 @@ Write, structure, rewrite, and referee-harden academic manuscripts for **Operati
 2. **Source-Fidelity & Protected-Regions Contract**: Preserve every factual claim, theorem statement, parameter symbol, assumption label, table number, `\cite{...}`, `\ref{...}`, `\eqref{...}`, and `.tex` macro. Never invent citations, proofs, robustness checks, or fake "humanizer" tics. Treat code, LaTeX math (`$...$`, `\[...\]`, `equation`, `align`), `booktabs` tables, and verbatim quotes as protected regions unless doing an explicit mathematical notation audit.
 3. **Silent 4-Pass Discipline (`<= 2` Iterative Passes)**: Diagnose internally and execute cleanly without narrating process steps inside manuscript prose. Stop after at most two focused revision passes per section unless the user requests an additional pass; never over-scrub domain-standard mathematical prose into conversational fluff.
 4. **Pure Reader-Facing English**: Target manuscript prose has zero memory of chat prompts, LLMs, or earlier drafts. Never leak meta-commentary (*"Unlike the previous version..."*, *"As requested..."*) or template placeholders (`TODO`, `FIXME`, `[INSERT ...]`) into `.tex` files.
+5. **Visual Aesthetics & Compiled-PDF QA**: Never judge typography, tables, or figures from `.tex` source alone. Build crisp `booktabs` tables (`@{}...@{}`, `\arraystretch`, `\cmidrule(lr)`) and vector figures sized for `8–10 pt` labels, compile the PDF whenever a TeX engine is available, run `scripts/check_pdf_layout.py`, and visually inspect flagged pages via `read_file` to catch blank voids, overlaps, margin overflows, or garbled glyphs.
 
 ---
 
@@ -33,11 +34,12 @@ Select the primary mode matching the user's request, load **only** the relevant 
 
 | Mode | When to Use | Load These References First |
 | :--- | :--- | :--- |
-| **Mode A: `0 -> 1` Drafting via Exemplars** | Starting from a core idea, problem, or outline; retrieving legal arXiv/SSRN/faculty-page PDFs to mirror section pacing, theorem-to-prose ratios, and paragraph cadence. | [workflow-write-exemplar.md](./references/workflow-write-exemplar.md), [section-and-lane-architecture.md](./references/section-and-lane-architecture.md), [journals-informs-matrix.md](./references/journals-informs-matrix.md) |
+| **Mode A: `0 -> 1` Drafting via Exemplars** | Starting from a core idea, problem, or outline; retrieving legal arXiv/SSRN/faculty-page PDFs to mirror section pacing, sentence-by-sentence Abstract architecture, Abstract/Intro word-count parity (`+/-15%--20%`), theorem-to-prose ratios, and paragraph cadence. | [workflow-write-exemplar.md](./references/workflow-write-exemplar.md), [section-and-lane-architecture.md](./references/section-and-lane-architecture.md), [journals-informs-matrix.md](./references/journals-informs-matrix.md) |
 | **Mode B: Anti-AI Rewriting & Prose Surgery** | Polishing an AI-generated or stiff human draft; pruning notation bloat; fixing cold-start concepts, defensive caveats, raw decimal dumping, definition drift, or chat leakage. | [workflow-rewrite-deai.md](./references/workflow-rewrite-deai.md), [human-craft-and-anti-ai.md](./references/human-craft-and-anti-ai.md), [math-notation-and-appendix.md](./references/math-notation-and-appendix.md) |
 | **Mode C: Referee Calibration, Contract Audit & Journal Retargeting** | Checking cross-section claim consistency, calibrating evidence verbs, preparing identification specs, converting a working paper for submission, or answering referees. | [manuscript-contract-and-reviewer-calibration.md](./references/manuscript-contract-and-reviewer-calibration.md), [empirical-and-identification-craft.md](./references/empirical-and-identification-craft.md), [journals-informs-matrix.md](./references/journals-informs-matrix.md) |
 
-Supporting template:
+Supporting resources (cross-mode):
+- Visual design standards (tables, vector figures) & compiled-PDF layout triage: [visual-design-and-pdf-qa.md](./references/visual-design-and-pdf-qa.md)
 - Master `informs4` LaTeX skeleton (all 4 journals + unified `\ECSwitch`): [informs4-master.tex](./templates/informs4-master.tex)
 
 ---
@@ -83,10 +85,14 @@ Run all three verification scripts from the skill root (or pass full paths to yo
    ```bash
    python scripts/check_prose_craft.py path/to/section.tex --section intro --strict
    ```
-3. **Cross-Section Contract Drift & Online Appendix Placement Audit** (`.tex` or `.md`/`.txt`):
+3. **Cross-Section Contract Drift, Exemplar Length Parity & Online Appendix Placement** (`.tex` or `.md`/`.txt`):
    ```bash
-   python scripts/audit_manuscript_contract.py path/to/main.tex --journal opre
+   python scripts/audit_manuscript_contract.py path/to/main.tex --journal opre --exemplar-abstract-words 180 --exemplar-intro-words 1450
    python scripts/audit_manuscript_contract.py --place-results items.txt --journal ijoc
    ```
+4. **Compiled-PDF Visual Layout, Whitespace & Glyph Gate** (always inspect rendered PNGs via `read_file`):
+   ```bash
+   python scripts/check_pdf_layout.py path/to/main.pdf --render-flagged /tmp/pdf_qa
+   ```
 
-After all gates pass cleanly, stage changed `.tex` files and create a descriptive Git commit before delivering the updated manuscript.
+After all source and PDF gates pass cleanly, stage changed `.tex` files and create a descriptive Git commit before delivering the updated manuscript.

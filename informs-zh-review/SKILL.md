@@ -56,15 +56,15 @@ Use when the user asks to translate an English `.tex` manuscript (or selected se
 - **Natural Chinese Academic Prose**: Write fluent, concise Chinese OR/MS prose—avoid stiff word-by-word translationese.
 - **Terminology Lock**: Maintain a strict 1-to-1 Chinese-to-English term mapping matching the English manuscript's canonical terms. On first occurrence of key technical constructs, attach the canonical English term in parentheses (e.g., `base-stock policy`, `submodularity`, `cross-moment regularity`).
 
-### Step 4: Compile, Verify & Commit
+### Step 4: Compile, Visually Inspect & Commit
 1. Compile inside `zh_review/` using `xelatex`:
    ```bash
    xelatex -interaction=nonstopmode -halt-on-error main_zh.tex
    xelatex -interaction=nonstopmode -halt-on-error main_zh.tex
    ```
    (On Windows, if `xelatex` is not on `PATH`, check `C:\texlive\2021\bin\win32\xelatex.exe`.)
-2. Verify `zh_review/main_zh.pdf` exists with non-zero size and zero compilation errors.
-3. Commit `zh_review/main_zh.tex` to Git (`feat(zh-review): generate main-text Chinese review PDF`), and present a clickable `file:///` link to `zh_review/main_zh.pdf`.
+2. Run `informs-writing`'s `check_pdf_layout.py` on `zh_review/main_zh.pdf` (`--render-flagged zh_review/annot_snapshots`) and inspect flagged or table/figure pages via `read_file` to catch missing CJK/math glyphs, overlapping text, blank pages, or oversized whitespace voids; remove temporary PNGs afterward.
+3. Verify `zh_review/main_zh.pdf` exists with non-zero size and zero blocking visual/glyph defects, commit `zh_review/main_zh.tex` to Git (`feat(zh-review): generate main-text Chinese review PDF`), and present a clickable `file:///` link to `zh_review/main_zh.pdf`.
 
 ---
 
@@ -95,9 +95,10 @@ python "<skill_dir>/scripts/extract_pdf_annotations.py" "<annotated.pdf>" --rend
 2. **Update `zh_review/main_zh.tex` in Lockstep**:
    - Mirror the updated English logic, wording, and notation identically in `zh_review/main_zh.tex` so both files stay 1-to-1 synchronized.
 
-### Step 4: Audit, Recompile, Clean & Commit
+### Step 4: Audit, Recompile, Visually Inspect, Clean & Commit
 1. Run `informs-writing`'s `audit_informs_draft.py` (and `check_prose_craft.py` on revised paragraphs) against the updated English `.tex` and resolve any flagged issues.
 2. Recompile `zh_review/main_zh.pdf` with `xelatex` (and recompile the English PDF if `informs4.cls` is present).
-3. Remove temporary `zh_review/annot_snapshots/` PNGs so binary snapshots do not clutter Git.
-4. Commit both updated `.tex` files to Git (`sync(zh-review): apply PDF annotations from <pdf_name>`).
-5. Present a concise **Revision Log Table** (`PDF Page | Annotation Summary | English Edit Location & Change | Chinese Sync Edit | Git Commit`) with clickable `file:///` links to the updated PDFs and `.tex` files.
+3. Run `informs-writing`'s `check_pdf_layout.py` on the compiled PDF(s) (`--render-flagged zh_review/annot_snapshots`), inspect any flagged pages or revised tables/figures via `read_file`, and fix any glyph garbling, giant whitespace gaps, overlaps, or margin overflows before finishing.
+4. Remove temporary `zh_review/annot_snapshots/` PNGs so binary snapshots do not clutter Git.
+5. Commit both updated `.tex` files to Git (`sync(zh-review): apply PDF annotations from <pdf_name>`).
+6. Present a concise **Revision Log Table** (`PDF Page | Annotation Summary | English Edit Location & Change | Chinese Sync Edit | Git Commit`) with clickable `file:///` links to the updated PDFs and `.tex` files.

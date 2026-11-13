@@ -22,6 +22,7 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 import audit_informs_draft as aud  # noqa: E402
 import audit_manuscript_contract as contract  # noqa: E402
+import check_pdf_layout as pdf_qa  # noqa: E402
 import check_prose_craft as craft  # noqa: E402
 
 
@@ -186,6 +187,20 @@ class TestInformsAudit(unittest.TestCase):
             )
             self.assertEqual(proc_adv.returncode, 0)
 
+    def test_visual_layout_hazard_warnings(self) -> None:
+        hazards = (
+            CLEAN_TEX_BASE.replace(
+                r"\begin{table}[t]",
+                "\\vspace{-1em}\n\\begin{table}[H]",
+            )
+            .replace(r"\begin{tabular}{lcc}", "\\resizebox{\\textwidth}{!}{\\begin{tabular}{lcc}")
+            .replace(r"\end{tabular}", "\\end{tabular}}")
+        )
+        warn_cats = {f.category for f in aud.audit_manuscript(hazards, journal="mnsc") if f.severity == "WARN"}
+        self.assertIn("FloatPlacement", warn_cats)
+        self.assertIn("TableScaling", warn_cats)
+        self.assertIn("NegativeVspace", warn_cats)
+
 
 class TestProseCraft(unittest.TestCase):
     def test_craft_rules(self) -> None:
@@ -242,6 +257,115 @@ See Online Appendix EC.2.
         bucket_ijoc, _ = contract.classify_result_item("Benchmark instances and solver GitHub code", "ijoc")
         self.assertIn("COMPANION_REPO", bucket_ijoc)
 
+    def test_word_count_parity_and_balance(self) -> None:
+        sample_md = "# Abstract\n" + " ".join(["word"] * 90) + "\n\n# Introduction\n" + " ".join(["text"] * 900)
+        _inv, findings = contract.audit_contract(
+            sample_md,
+            journal="mnsc",
+            exemplar_abs_words=180,
+            exemplar_intro_words=1500,
+        )
+        cats = {f.category for f in findings}
+        self.assertIn("WordCountParity", cats)
+
+        _inv2, ok_findings = contract.audit_contract(
+            sample_md,
+            journal="mnsc",
+            exemplar_abs_words=95,
+            exemplar_intro_words=920,
+        )
+        ok_cats = {f.category for f in ok_findings}
+        self.assertNotIn("WordCountParity", ok_cats)
+
+
+class TestPdfLayoutAuditor(unittest.TestCase):
+    def test_clean_pdf_with_math_scripts_passes(self) -> None:
+        import fitz
+
+        with tempfile.TemporaryDirectory() as tmp:
+            pdf_path = Path(tmp) / "clean.pdf"
+            doc = fitz.open()
+            for p in range(2):
+                page = doc.new_page(width=612, height=792)
+                for y in range(100, 660, 22):
+                    page.insert_text(
+                        (72, y),
+                        f"Page {p + 1} clean line {y}: concrete operational intuition holds cleanly.",
+                        fontsize=10.5,
+                    )
+                # Simulated inline variable with small subscript/superscript slightly overlapping bbox
+                page.insert_text((72, 682), "x", fontsize=11.0)
+                page.insert_text((77, 686), "i", fontsize=6.5)
+                page.insert_text((78, 677), "2", fontsize=6.5)
+            doc.save(str(pdf_path))
+            doc.close()
+
+            findings, _ = pdf_qa.audit_pdf(pdf_path)
+            errs = [f for f in findings if f.severity == "ERROR"]
+            self.assertEqual(errs, [], f"Expected 0 ERRORs on clean PDF, got {errs}")
+
+    def test_garbled_overlap_blank_gap_margin_and_log(self) -> None:
+        import fitz
+
+        with tempfile.TemporaryDirectory() as tmp:
+            pdf_path = Path(tmp) / "broken.pdf"
+            log_path = Path(tmp) / "broken.log"
+            snap_dir = Path(tmp) / "snaps"
+
+            doc = fitz.open()
+            # Page 1: mojibake Ã©, unresolved ??, [?], overlapping lines, right-margin overflow
+            p1 = doc.new_page(width=612, height=792)
+            p1.insert_text((72, 100), "Broken mojibake Ã© in Section ?? and citation [?].", fontsize=11)
+            p1.insert_text((72, 102), "Colliding overlapping line drawn right across top line.", fontsize=11)
+            p1.insert_text((430, 160), "Extremely long overflowing expression into right margin edge!", fontsize=11)
+            for y in range(200, 680, 24):
+                p1.insert_text((72, y), f"Body filler row {y} keeping page non-blank.", fontsize=10.5)
+
+            # Page 2: completely blank interior page
+            doc.new_page(width=612, height=792)
+
+            # Page 3: top text + giant mid-page gap + bottom text
+            p3 = doc.new_page(width=612, height=792)
+            p3.insert_text((72, 105), "Top block ends abruptly before restrictive float gap.", fontsize=11)
+            p3.insert_text((72, 125), "Short continuation line above whitespace gap.", fontsize=11)
+            p3.insert_text((72, 640), "Bottom block forced way down leaving giant void.", fontsize=11)
+
+            doc.save(str(pdf_path))
+            doc.close()
+
+            log_path.write_text(
+                "Missing character: There is no \u2212 in font cmr10!\n"
+                "Overfull \\hbox (18.5pt too wide) in paragraph at lines 42--45\n"
+                "Underfull \\vbox (badness 10000) has occurred while \\output is active\n",
+                encoding="utf-8",
+            )
+
+            findings, snaps = pdf_qa.audit_pdf(pdf_path, log_path=log_path, render_dir=snap_dir)
+            cats = {f.category for f in findings}
+            for expected in (
+                "GarbledText",
+                "UnresolvedRef",
+                "TextOverlap",
+                "MarginProtrusion",
+                "BlankPage",
+                "MidPageGap",
+                "MissingGlyph",
+                "OverfullHbox",
+                "UnderfullVbox",
+            ):
+                self.assertIn(expected, cats, f"Missing expected PDF finding {expected}; got {cats}")
+
+            self.assertTrue(len(snaps) >= 2, f"Expected flagged PNG snapshots, got {snaps}")
+            for sp in snaps:
+                self.assertTrue(sp.is_file() and sp.stat().st_size > 0)
+
+            proc = subprocess.run(
+                [sys.executable, str(SCRIPTS_DIR / "check_pdf_layout.py"), str(pdf_path), "--render-flagged", str(snap_dir)],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+
 
 class TestSkillHygieneAndLinks(unittest.TestCase):
     def test_zero_cjk_inside_informs_writing(self) -> None:
@@ -256,16 +380,18 @@ class TestSkillHygieneAndLinks(unittest.TestCase):
                 )
 
     def test_skill_markdown_relative_links_exist(self) -> None:
-        link_re = re.compile(r"\]\((\./[^)#\s]+)")
-        for skill_dir in (INFORMS_WRITING_DIR, ZH_REVIEW_DIR):
-            skill_md = skill_dir / "SKILL.md"
-            self.assertTrue(skill_md.is_file(), f"Missing {skill_md}")
-            text = skill_md.read_text(encoding="utf-8")
+        link_re = re.compile(r"\]\((\.\.?/[^)#\s]+)")
+        md_files = [INFORMS_WRITING_DIR / "SKILL.md", ZH_REVIEW_DIR / "SKILL.md"] + sorted(
+            (INFORMS_WRITING_DIR / "references").glob("*.md")
+        )
+        for md_path in md_files:
+            self.assertTrue(md_path.is_file(), f"Missing {md_path}")
+            text = md_path.read_text(encoding="utf-8")
             for rel in link_re.findall(text):
-                target = (skill_dir / rel).resolve()
+                target = (md_path.parent / rel).resolve()
                 self.assertTrue(
                     target.exists(),
-                    f"Broken link {rel} inside {skill_md} -> {target}",
+                    f"Broken link {rel} inside {md_path} -> {target}",
                 )
 
 

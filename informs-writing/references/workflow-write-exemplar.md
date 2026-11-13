@@ -36,9 +36,10 @@ Locate 2–3 recent published papers (last 5–8 years) in the **target journal*
 
 Extract three layers from the exemplars before touching `.tex`:
 
-### Layer 1: Macro Architecture & Online Appendix Split
+### Layer 1: Macro Architecture, Word-Count Parity & Online Appendix Split
 - Section sequence, subsection depth, where Related Literature lives (§1.2 vs §2), and what proofs/logs move to `Online Appendix EC.x`.
 - Target length allocation (remember `opre` <= 30 pp excl. refs, `mnsc` <= 32 pp at 1.5x, `msom` <= 32 pp ALL-INCLUSIVE + 16 pp EC, `ijoc` <= 25 pp).
+- **Abstract & Introduction Word-Count Parity**: Record the exemplar's exact Abstract word & sentence counts (typically `150–210` words across `5–7` sentences) and Introduction word & paragraph counts (typically `1,100–1,800` words across `8–12` paragraphs). Keep your Abstract and Introduction within **`+/-15%--20%`** of the exemplar benchmark—never write a stubby 70-word Abstract or 450-word Intro, nor an overgrown 320-word Abstract or 2,800-word Intro; preserve a balanced Abstract-to-Intro ratio (`~1:6` to `1:11`).
 
 ### Layer 2: Paragraph-by-Paragraph Role Blueprint
 Build a compact blueprint mapping the exemplars' argument dependency onto the user's Paper Spine (do NOT force every paragraph into an identical 5-part formula; match the passage's actual burden):
@@ -49,6 +50,17 @@ Build a compact blueprint mapping the exemplars' argument dependency onto the us
 | P2 | Stream gap / technical hurdle | Prior stream or benchmark | What existing analysis omits | **0 symbols** | Why the gap is non-trivial |
 | P3 | Research question & setup | `We study...` / `We ask...` | Object, lever, design, benchmark | **0–1 scalar** | Preview of core trade-off & finding |
 | ... | ... | ... | ... | ... | ... |
+
+### Layer 2B: Sentence-by-Sentence Abstract Structural Blueprint
+Unlike long body sections where only paragraph-level pacing is mirrored, the **Abstract is the single best unit for strict sentence-by-sentence structural imitation (`S1 -> S2 -> ... -> Sk`)**:
+1. Extract every sentence from your primary exemplar's Abstract alongside its functional job, grammatical spine, verb strength, and word count (`~22–32` words/sentence).
+2. Map your Paper Spine onto those exact sentence slots using original phrasing and zero copied domain text:
+   - **`S1` (Setting & Tension)**: Concrete operational/economic domain and decision trade-off.
+   - **`S2` (Bottleneck / Gap)**: Specific analytical, identification, or computational obstacle breaking standard benchmarks.
+   - **`S3` (Object & Method)**: Central model, estimator, or algorithm (`We develop / study / identify...`), zero symbols.
+   - **`S4` (Core Mechanism / Characterization)**: Main structural property, theorem, or causal effect and its economic driver.
+   - **`S5` (Benchmarked Payoff)**: Analytical bound or clean rounded magnitude relative to an explicit comparator (keep exact decimals inside body tables).
+   - **`S6` (Regime / Implication)**: When the insight reverses or matters most operationally/computationally (for `msom`, partition `S1–S2` -> `\textbf{Problem definition:}`, `S3–S4` -> `\textbf{Methodology/results:}`, `S5–S6` -> `\textbf{Managerial implications:}`).
 
 ### Layer 3: Syntactic Cadence & Sentence Skeletons (Taste & Boundaries)
 Steal the **grammatical skeleton and rhythm**, never content phrasing:
@@ -66,22 +78,26 @@ Steal the **grammatical skeleton and rhythm**, never content phrasing:
 
 1. **Confirm Blueprint First**: Show the concise Layer 2 table (plus planned Section Headings) to the user for quick alignment unless the user explicitly asked to draft directly.
 2. **Draft in `informs4` LaTeX**:
-   - Base on [informs4-master.tex](./templates/informs4-master.tex) (`informs4` + `natbib` + `informs2014` + `booktabs` + `threeparttable`).
-   - Draft the **Introduction early**, revise as the body sharpens, and extract/polish the **Abstract LAST** so zero contract drift occurs between Abstract, Body, and Conclusion.
+   - Base on [informs4-master.tex](../templates/informs4-master.tex) (`informs4` + `natbib` + `informs2014` + `booktabs` + `threeparttable`).
+   - Draft the **Introduction early**, revise as the body sharpens, and lock/polish the **sentence-by-sentence Abstract LAST** against Layer 2B and the finished Introduction so zero contract drift or word-count imbalance occurs between Abstract, Intro, and Conclusion.
    - Enforce **all 7 Iron Rules**: zero orphan symbols, Just-in-Time symbol naming, unreferenced displays unnumbered, 4-beat onboarding before unfamiliar concepts, concrete SVO + calibrated verbs, positive upfront scope (zero defensive caveats), rounded patterns in prose + 2-decimal precision in `booktabs` tables, one locked canonical term per concept (`<= 2` formal `\begin{definition}` blocks), and timeless standalone prose.
    - Enforce **100% Unified Online Appendix (`\ECSwitch`)**: Zero regular `\appendix`; draft complete proofs/helper lemmas/secondary tables cleanly under `\ECSwitch` + `\ECHead{...}` (respecting M&SOM's 16-page cap), and give every `opre`/`ijoc` headline theorem a 3–6 sentence body Proof Sketch.
 
 ---
 
-## Step 5: Automated Gate Check, Contract Verification & Git Commit
+## Step 5: Automated Gate Check, Compiled-PDF Visual QA & Git Commit
 
 1. Run pre-flight `git status` if not already tracked, then run the hard-blocking LaTeX audit:
    ```bash
    python "<skill_dir>/scripts/audit_informs_draft.py" <manuscript.tex> --journal <opre|mnsc|msom|ijoc>
    ```
-2. For full-paper drafts, also run cross-section contract drift check:
+2. For full-paper drafts, also run cross-section contract drift & exemplar Abstract/Intro length parity check:
    ```bash
-   python "<skill_dir>/scripts/audit_manuscript_contract.py" <manuscript.tex> --journal <opre|mnsc|msom|ijoc>
+   python "<skill_dir>/scripts/audit_manuscript_contract.py" <manuscript.tex> --journal <opre|mnsc|msom|ijoc> --exemplar-abstract-words <N_abs> --exemplar-intro-words <N_intro>
    ```
-3. Fix every flagged error or warning, verify clean exit code `0`, and commit atomically:
+3. Compile the full multi-pass PDF whenever TeX (`pdflatex`/`xelatex`/`latexmk`) is available, audit layout/glyphs/whitespace, and visually inspect flagged PNGs plus table/figure pages via `read_file` (see [visual-design-and-pdf-qa.md](./visual-design-and-pdf-qa.md)):
+   ```bash
+   python "<skill_dir>/scripts/check_pdf_layout.py" <manuscript.pdf> --render-flagged /tmp/pdf_qa
+   ```
+4. Fix every source or visual PDF defect (garbled characters, large voids, text overlaps, margin overflows), verify clean exit code `0`, and commit atomically:
    `git add <core_tex_and_bib> && git commit -m "draft(<section>): write <section> aligned with <journal> exemplars"`

@@ -158,7 +158,12 @@ def parse_sections(raw: str) -> dict[str, str]:
     return {k: "\n".join(v).strip() for k, v in sections.items()}
 
 
-def audit_contract(raw: str, journal: str = "mnsc") -> tuple[dict[str, int], list[ContractFinding]]:
+def audit_contract(
+    raw: str,
+    journal: str = "mnsc",
+    exemplar_abs_words: int | None = None,
+    exemplar_intro_words: int | None = None,
+) -> tuple[dict[str, int], list[ContractFinding]]:
     sections = parse_sections(raw)
     inventory = {k: len(re.findall(r"\b[a-zA-Z0-9-]+\b", v)) for k, v in sections.items()}
     findings: list[ContractFinding] = []
@@ -269,6 +274,51 @@ def audit_contract(raw: str, journal: str = "mnsc") -> tuple[dict[str, int], lis
             )
         )
 
+    # 7. Exemplar Abstract / Intro word-count parity and internal length balance
+    abs_wc = inventory["Abstract"]
+    intro_wc = inventory["Intro"]
+    if exemplar_abs_words and exemplar_abs_words > 0 and abs_wc > 0:
+        rel_diff = abs(abs_wc - exemplar_abs_words) / exemplar_abs_words
+        if rel_diff > 0.20:
+            findings.append(
+                ContractFinding(
+                    "WARN",
+                    "WordCountParity",
+                    "Abstract",
+                    f"Abstract word count ({abs_wc}w) deviates {rel_diff * 100:.0f}% from exemplar benchmark ({exemplar_abs_words}w; target within +/-20%).",
+                )
+            )
+    if exemplar_intro_words and exemplar_intro_words > 0 and intro_wc > 0:
+        rel_diff = abs(intro_wc - exemplar_intro_words) / exemplar_intro_words
+        if rel_diff > 0.20:
+            findings.append(
+                ContractFinding(
+                    "WARN",
+                    "WordCountParity",
+                    "Intro",
+                    f"Introduction word count ({intro_wc}w) deviates {rel_diff * 100:.0f}% from exemplar benchmark ({exemplar_intro_words}w; target within +/-20%).",
+                )
+            )
+    if sum(inventory.values()) >= 800 and abs_wc > 0 and intro_wc > 0:
+        if intro_wc < 3 * abs_wc or intro_wc < 500:
+            findings.append(
+                ContractFinding(
+                    "WARN",
+                    "LengthBalance",
+                    "Abstract/Intro",
+                    f"Introduction ({intro_wc}w) is disproportionately short relative to Abstract ({abs_wc}w); target ~6x--11x Abstract length (~1,100--1,800w).",
+                )
+            )
+        elif intro_wc > 2600:
+            findings.append(
+                ContractFinding(
+                    "WARN",
+                    "LengthBalance",
+                    "Abstract/Intro",
+                    f"Introduction ({intro_wc}w) is disproportionately long (>2,600w); tighten motivation so core results keep budget.",
+                )
+            )
+
     return inventory, findings
 
 
@@ -318,6 +368,18 @@ def main() -> int:
         action="store_true",
         help="Read one item per line and emit MAIN_BODY vs. ONLINE_APPENDIX_EC placement plan",
     )
+    parser.add_argument(
+        "--exemplar-abstract-words",
+        type=int,
+        default=None,
+        help="Exemplar Abstract word count target for +/-20%% parity check",
+    )
+    parser.add_argument(
+        "--exemplar-intro-words",
+        type=int,
+        default=None,
+        help="Exemplar Introduction word count target for +/-20%% parity check",
+    )
     parser.add_argument("--strict", action="store_true", help="Exit 1 on WARN as well as ERROR")
     parser.add_argument("--advisory", action="store_true", help="Always exit 0")
     args = parser.parse_args()
@@ -343,7 +405,12 @@ def main() -> int:
             print(f"  {idx:02d}. [{bucket}] {stripped}\n      -> {rationale}")
         return 0
 
-    inventory, findings = audit_contract(raw, journal=args.journal)
+    inventory, findings = audit_contract(
+        raw,
+        journal=args.journal,
+        exemplar_abs_words=args.exemplar_abstract_words,
+        exemplar_intro_words=args.exemplar_intro_words,
+    )
     inv_str = ", ".join(f"{k}={w}w" for k, w in inventory.items() if w > 0)
     print(f"INVENTORY ({name}, journal={args.journal}): {inv_str or 'no explicit section headers detected'}")
 

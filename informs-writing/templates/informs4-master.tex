@@ -29,9 +29,12 @@
 \def\newblock{\ }
 \def\BIBand{and}
 
-% --- Core Math, Tables, Figures, Algorithms & Cross-References ---
+% --- Core Math, Typography, Tables, Figures, Algorithms & Cross-References ---
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
 \usepackage{amsmath,amssymb,amsfonts,mathtools}
-\usepackage{booktabs,threeparttable,multirow}
+\allowdisplaybreaks[1]
+\usepackage{booktabs,threeparttable,multirow,siunitx}
 \usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -121,6 +124,34 @@
 
 % Summarize patterns, mechanisms, and clean rounded magnitudes in prose;
 % keep exact decimals inside booktabs tables.
+%
+% Visually polished table pattern (flush @{} edges, [tbp] float, no \resizebox):
+% \begin{table}[tbp]
+% \centering
+% \renewcommand{\arraystretch}{1.12}
+% \begin{threeparttable}
+% \caption{Main Benchmark Comparison}\label{tab:main}
+% \begin{tabular}{@{}lcc@{}}
+% \toprule
+% Policy & Cost & Gap (\%) \\
+% \midrule
+% Static Benchmark & 14.82 & 6.41 \\
+% Adaptive Rule    & 13.93 & 0.00 \\
+% \bottomrule
+% \end{tabular}
+% \begin{tablenotes}\footnotesize
+% \item \textit{Notes.} Gaps computed against the hindsight DP lower bound.
+% \end{tablenotes}
+% \end{threeparttable}
+% \end{table}
+%
+% Vector figure pattern (avoid restrictive [h]/[H] to prevent giant page voids):
+% \begin{figure}[tbp]
+% \centering
+% \includegraphics[width=0.78\textwidth]{figures/policy_threshold.pdf}
+% \caption{Optimal Threshold Policy Structure}
+% \label{fig:threshold}
+% \end{figure}
 
 % ==============================================================================
 \section{Conclusion}

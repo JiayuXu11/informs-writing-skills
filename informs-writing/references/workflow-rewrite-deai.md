@@ -69,7 +69,7 @@ Apply [human-craft-and-anti-ai.md](./human-craft-and-anti-ai.md):
 
 ---
 
-## Step 4: Automated Audit Gate & Git Commit
+## Step 4: Automated Audit Gate, Compiled-PDF QA & Git Commit
 
 1. For single passages or sections:
    ```bash
@@ -80,4 +80,8 @@ Apply [human-craft-and-anti-ai.md](./human-craft-and-anti-ai.md):
    python "<skill_dir>/scripts/audit_informs_draft.py" <manuscript.tex> --journal <opre|mnsc|msom|ijoc>
    python "<skill_dir>/scripts/audit_manuscript_contract.py" <manuscript.tex> --journal <opre|mnsc|msom|ijoc>
    ```
-3. Resolve every flagged `[ERROR]` (and relevant `[WARN]`), verify clean exit `0`, commit atomically (`git add <files> && git commit -m "revise(<scope>): <concise summary>"`), and summarize edits briefly alongside the commit hash.
+3. Compile the updated `.tex` to PDF whenever TeX is available, run the visual PDF layout checker, and inspect flagged pages with `read_file` to rule out garbled glyphs, oversized blank bands, overlapping lines, or margin overflows ([visual-design-and-pdf-qa.md](./visual-design-and-pdf-qa.md)):
+   ```bash
+   python "<skill_dir>/scripts/check_pdf_layout.py" <manuscript.pdf> --render-flagged /tmp/pdf_qa
+   ```
+4. Resolve every flagged `[ERROR]` (and relevant `[WARN]`), verify clean exit `0`, commit atomically (`git add <files> && git commit -m "revise(<scope>): <concise summary>"`), and summarize edits briefly alongside the commit hash.

@@ -89,17 +89,21 @@ This skill enforces a **100% Unified Online Appendix policy**: ZERO regular `\ap
 
 ## 5. Publication-Grade `booktabs` Tables & Vector Figures
 
+For complete aesthetic specifications and compiled-PDF defect triage, consult [visual-design-and-pdf-qa.md](./visual-design-and-pdf-qa.md).
+
 ### Table Rules (`booktabs` + `threeparttable` + `siunitx`)
-- **NEVER** use `\hline` or vertical column lines `|`. Use strictly `\toprule`, `\midrule`, `\bottomrule`, and `\cmidrule(lr){...}` for column groups.
+- **NEVER** use `\hline` or vertical column lines `|`. Use strictly `\toprule`, `\midrule`, `\bottomrule`, `@{}...@{}` flush outer edges, and `\cmidrule(lr){...}` for column groups.
+- **Breathing Room & Anti-Cramming**: Set `\renewcommand{\arraystretch}{1.12}`, insert `\addlinespace[4pt]` between logical panels, and avoid `\resizebox{\textwidth}{!}` scaling distortion (instead shorten multi-line headers, tune `\tabcolsep`, or use `\small`).
 - **Decimal Alignment & Consistent Precision**: Report 2–3 meaningful decimal places cleanly via `S[table-format=1.2]` (`siunitx`) or fixed formatting; show standard errors in parentheses beneath coefficients; place sample sizes $N$, fixed effects, R-squared/gaps, hardware/time limits, and plain-English variable definitions inside `\begin{tablenotes}` so every table stands alone.
 - Every numerical pattern highlighted in prose must appear in the table, and every table must be interpreted by patterns in the body without reading rows aloud cell by cell (Iron Rule 5).
 
 ```latex
-\begin{table}[t]
+\begin{table}[tbp]
 \centering
+\renewcommand{\arraystretch}{1.12}
 \begin{threeparttable}
 \caption{Performance Comparison Across Demand Volatility Regimes}\label{tab:main}
-\begin{tabular}{lcccc}
+\begin{tabular}{@{}lcccc@{}}
 \toprule
  & \multicolumn{2}{c}{Low Volatility} & \multicolumn{2}{c}{High Volatility} \\
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
@@ -110,7 +114,7 @@ Adaptive Policy  & 1.32 & 6.95 & 4.83 & 10.74 \\
                  & (0.14) & (0.28) & (0.21) & (0.41) \\
 \bottomrule
 \end{tabular}
-\begin{tablenotes}\small
+\begin{tablenotes}\footnotesize
 \item \textit{Notes:} Profit gains are measured relative to the static newsvendor benchmark over $1{,}000$ out-of-sample test paths. Bootstrap standard errors appear in parentheses.
 \end{tablenotes}
 \end{threeparttable}
@@ -118,6 +122,6 @@ Adaptive Policy  & 1.32 & 6.95 & 4.83 & 10.74 \\
 ```
 
 ### Figure Rules (Schwabish / Tufte Principles)
-- Export publication figures as **vector PDF** (matplotlib `bbox_inches="tight"`, R `ggsave`, Stata `graph export fig.pdf, replace`)—avoid blurry PNG/JPG unless showing photos/maps.
-- Use `subcaption` for side-by-side panels (`0.48\textwidth`), keep uniform widths across the paper, label curves directly on the plot instead of bloated legends whenever legible, and avoid thin dotted lines that vanish in print.
-- **No Table-vs-Figure Duplication**: Present each quantitative comparison in EITHER a table (exact regressions/benchmarks) OR a figure (time trends, event studies, RD jumps, policy thresholds, non-linear curves)—not both in the main body.
+- Export publication figures as **vector PDF** (matplotlib `bbox_inches="tight"`, R `ggsave`, Stata `graph export fig.pdf, replace`)—avoid blurry PNG/JPG unless showing photos/maps (`>= 300 DPI`).
+- Design plots near target print width (`figsize=(6.0, 3.6)` full-width, `(3.1, 2.7)` per 2-up subpanel) with serif math typography so axis/tick labels stay **8–10 pt** on page; pair colorblind-safe palettes with distinct line styles (`solid`, `dashed`, `dashdot`) for grayscale legibility.
+- Place floats with `[tbp]` or `[htbp]` (avoid restrictive `[h]`/`[H]`), keep uniform widths across the paper, remove top/right spines, label curves directly whenever legible, and avoid Table-vs-Figure duplication.
