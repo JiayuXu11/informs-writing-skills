@@ -22,7 +22,7 @@ All four journals share a common field baseline (**100% Unified Online Appendix 
 | `informs4` Option | Journal | Abstract & Metadata Rules | Main-Body & Appendix Rules | Editorial Focus |
 | :--- | :--- | :--- | :--- | :--- |
 | `opre` | *Operations Research* | `\ABSTRACT` + mandatory `\SUBJECTCLASS` + `\AREAOFREVIEW` | ~32–36 pp. single-spaced; `\ECSwitch` + 3–6 sentence body Proof Sketch per headline theorem | Structural rigor, methodological depth, nontrivial payoff |
-| `mnsc` | *Management Science* | `\ABSTRACT` (<= 200 words) + 3–5 lowercase `\KEYWORDS` | <= 32 pp. `1.5`-spaced incl. refs; `\ECSwitch`; Data & Code Disclosure section | Cross-functional breadth, causal/mechanism clarity, practical insight |
+| `mnsc` | *Management Science* | `\ABSTRACT` (`< 270` words; check portal limit) + 3–5 lowercase `\KEYWORDS` | <= 32 pp. `1.5`-spaced incl. refs; `\ECSwitch`; Data & Code Disclosure section | Cross-functional breadth, causal/mechanism clarity, practical insight |
 | `msom` | *M&SOM* | Mandatory 3-part `\ABSTRACT` (`Problem definition`, `Methodology/results`, `Managerial implications`) | <= 32 pp. manuscript; `\ECSwitch` (**16-page target ceiling**); `\endnote` instead of `\footnote` | Practice-grounded operations modeling & managerial relevance |
 | `ijoc` | *INFORMS J. on Computing* | Concise `\ABSTRACT` highlighting algorithmic & computational impact | ~30–35 pp. incl. refs; `\ECSwitch`; `algorithm2e` pseudocode + `.cd` **Dual-DOI** `INFORMSJoC` companion repo | OR + CS fusion, complexity/scalability benchmarks, full reproducibility |
 
@@ -52,7 +52,7 @@ python informs-writing/scripts/audit_informs_draft.py path/to/main.tex --journal
 python informs-writing/scripts/check_prose_craft.py path/to/section.tex --section intro --strict
 
 # 3. Cross-section contract drift, Abstract/Intro length parity & Unified Online Appendix placement
-python informs-writing/scripts/audit_manuscript_contract.py path/to/main.tex --journal opre --exemplar-abstract-words 180 --exemplar-intro-words 1450
+python informs-writing/scripts/audit_manuscript_contract.py path/to/main.tex --journal opre --exemplar-abstract-words <N_abs> --exemplar-intro-words <N_intro>
 python informs-writing/scripts/audit_manuscript_contract.py --place-results items.txt --journal ijoc
 
 # 4. Compiled-PDF visual layout, whitespace, overlap & glyph integrity audit

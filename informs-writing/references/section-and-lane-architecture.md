@@ -15,11 +15,11 @@ Use this reference when choosing titles, structuring sections across different O
 - **Avoid**: `"A Study on..."`, `"On Various Factors..."`, `"An Empirical Investigation of..."`, or method-only labels (`"A Difference-in-Differences Analysis of..."`) unless inventing the estimator itself.
 
 ### Sentence-by-Sentence Abstract Craft
-- Treat the exemplar's Abstract as a **sentence-by-sentence blueprint (`S1 -> S2 -> ... -> Sk`)**: match each sentence's argumentative job, verb calibration, and tight pacing (`5–7` sentences total: `S1` setting/tension -> `S2` bottleneck/gap -> `S3` central model/design -> `S4` headline mechanism/theorem -> `S5` benchmarked magnitude -> `S6` regime boundary/implication), with **zero** math symbols/equations and **zero** citations.
+- Treat the exemplar's Abstract as a **sentence-by-sentence blueprint (`S1 -> S2 -> ... -> Sk`)**: match each sentence's argumentative job, grammatical spine, and verb calibration (`S1` setting/tension -> `S2` bottleneck/gap -> `S3` central model/design -> `S4` headline mechanism/theorem -> `S5` benchmarked magnitude -> `S6` regime boundary/implication), with **zero** math symbols/equations and **zero** citations. Generally keep the Abstract **under 270 words (`< 270` words)**, calibrated closely to your exemplar's Abstract word count.
 
-### Abstract & Introduction Word-Count Parity
-- Calibrate both Abstract length (`~150–210` words within target-journal caps) and Introduction length (`~1,100–1,800` words across `8–12` paragraphs) within **`+/-15%--20%`** of your target-journal exemplar benchmarks.
-- Avoid two symmetric defects: (a) a stunted 400–600-word Introduction that merely repeats the Abstract without institutional friction, positioning, or roadmap; and (b) a 2,600+ word Introduction that drifts into a mini-textbook and steals page budget from core theorems and tables. Maintain a balanced Abstract-to-Intro word ratio (`~1:6` to `1:11`).
+### Introduction Page Cap (`<= 3` Pages) & Exemplar Section Word-Count Reference
+- Keep the compiled **Introduction within 3 pages (`<= 3` pages)** so motivation and contribution framing stay crisp and never steal budget from main theorems and empirical tables.
+- Benchmark the word count of each manuscript section (Abstract, Introduction, Model/Design, Main Results) against the corresponding section of your target-journal exemplars (`+/-15%--20%`), ensuring the Introduction substantively expands upon the Abstract rather than collapsing toward Abstract length.
 
 ---
 

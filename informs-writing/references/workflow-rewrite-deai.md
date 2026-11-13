@@ -48,7 +48,7 @@ Apply [human-craft-and-anti-ai.md](./human-craft-and-anti-ai.md):
 
 ### Pass 4: Preserve LaTeX Integrity & Journal Rules
 - Verify zero `\hline` or vertical `|` bars inside tables (`booktabs` + `threeparttable`).
-- Enforce exact target-journal rules in [journals-informs-matrix.md](./journals-informs-matrix.md) (`msom` 3-part abstract + zero `\footnote`; `opre` `\SUBJECTCLASS`/`\AREAOFREVIEW` + `<= 200` abstract; `mnsc` `3–5` lowercase keywords + `<= 250` abstract; `ijoc` numbered `algorithm` + `.cd` repo reproducibility).
+- Enforce exact target-journal rules in [journals-informs-matrix.md](./journals-informs-matrix.md) (keep Abstract `< 270` words and compiled Introduction `<= 3` pages; check portal entry caps for `opre`/`mnsc`; `msom` 3-part abstract + zero `\footnote`; `opre` `\SUBJECTCLASS`/`\AREAOFREVIEW`; `mnsc` `3–5` lowercase keywords; `ijoc` numbered `algorithm` + `.cd` repo reproducibility).
 
 ---
 

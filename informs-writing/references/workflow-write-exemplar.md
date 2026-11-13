@@ -36,10 +36,11 @@ Locate 2–3 recent published papers (last 5–8 years) in the **target journal*
 
 Extract three layers from the exemplars before touching `.tex`:
 
-### Layer 1: Macro Architecture, Word-Count Parity & Online Appendix Split
+### Layer 1: Macro Architecture, Section Word-Count Reference & Online Appendix Split
 - Section sequence, subsection depth, where Related Literature lives (§1.2 vs §2), and what proofs/logs move to `Online Appendix EC.x`.
 - Target length allocation (remember `opre` <= 30 pp excl. refs, `mnsc` <= 32 pp at 1.5x, `msom` <= 32 pp ALL-INCLUSIVE + 16 pp EC, `ijoc` <= 25 pp).
-- **Abstract & Introduction Word-Count Parity**: Record the exemplar's exact Abstract word & sentence counts (typically `150–210` words across `5–7` sentences) and Introduction word & paragraph counts (typically `1,100–1,800` words across `8–12` paragraphs). Keep your Abstract and Introduction within **`+/-15%--20%`** of the exemplar benchmark—never write a stubby 70-word Abstract or 450-word Intro, nor an overgrown 320-word Abstract or 2,800-word Intro; preserve a balanced Abstract-to-Intro ratio (`~1:6` to `1:11`).
+- **Exemplar Section Word-Count Reference**: Record the word counts of the corresponding sections in your 2–3 exemplar papers (Abstract, Introduction, Model/Setup, Main Results, etc.) and use them as a primary calibration benchmark (`+/-15%--20%` parity).
+- **Abstract & Introduction Ceilings**: Keep the Abstract **under 270 words (`< 270` words)**, and keep the compiled **Introduction within 3 pages (`<= 3` pages)**—never let the Abstract and Introduction collapse to nearly the same length, and never let the Introduction sprawl past page 3.
 
 ### Layer 2: Paragraph-by-Paragraph Role Blueprint
 Build a compact blueprint mapping the exemplars' argument dependency onto the user's Paper Spine (do NOT force every paragraph into an identical 5-part formula; match the passage's actual burden):
@@ -53,7 +54,7 @@ Build a compact blueprint mapping the exemplars' argument dependency onto the us
 
 ### Layer 2B: Sentence-by-Sentence Abstract Structural Blueprint
 Unlike long body sections where only paragraph-level pacing is mirrored, the **Abstract is the single best unit for strict sentence-by-sentence structural imitation (`S1 -> S2 -> ... -> Sk`)**:
-1. Extract every sentence from your primary exemplar's Abstract alongside its functional job, grammatical spine, verb strength, and word count (`~22–32` words/sentence).
+1. Extract every sentence from your primary exemplar's Abstract alongside its functional job, grammatical spine, and verb strength, while keeping total Abstract length `< 270` words and closely matched to the exemplar's Abstract word count.
 2. Map your Paper Spine onto those exact sentence slots using original phrasing and zero copied domain text:
    - **`S1` (Setting & Tension)**: Concrete operational/economic domain and decision trade-off.
    - **`S2` (Bottleneck / Gap)**: Specific analytical, identification, or computational obstacle breaking standard benchmarks.

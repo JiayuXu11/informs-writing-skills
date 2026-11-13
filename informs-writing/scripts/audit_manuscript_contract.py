@@ -274,9 +274,18 @@ def audit_contract(
             )
         )
 
-    # 7. Exemplar Abstract / Intro word-count parity and internal length balance
+    # 7. Exemplar Abstract / Intro word-count parity, < 270w Abstract, and <= 3p Intro budget
     abs_wc = inventory["Abstract"]
     intro_wc = inventory["Intro"]
+    if abs_wc >= 270:
+        findings.append(
+            ContractFinding(
+                "WARN",
+                "AbstractLength",
+                "Abstract",
+                f"Abstract has {abs_wc} words (keep < 270 words and close to your exemplar's Abstract length).",
+            )
+        )
     if exemplar_abs_words and exemplar_abs_words > 0 and abs_wc > 0:
         rel_diff = abs(abs_wc - exemplar_abs_words) / exemplar_abs_words
         if rel_diff > 0.20:
@@ -299,25 +308,25 @@ def audit_contract(
                     f"Introduction word count ({intro_wc}w) deviates {rel_diff * 100:.0f}% from exemplar benchmark ({exemplar_intro_words}w; target within +/-20%).",
                 )
             )
-    if sum(inventory.values()) >= 800 and abs_wc > 0 and intro_wc > 0:
-        if intro_wc < 3 * abs_wc or intro_wc < 500:
+    if sum(inventory.values()) >= 500 and abs_wc > 0 and intro_wc > 0:
+        if intro_wc < 2.5 * abs_wc:
             findings.append(
                 ContractFinding(
                     "WARN",
                     "LengthBalance",
                     "Abstract/Intro",
-                    f"Introduction ({intro_wc}w) is disproportionately short relative to Abstract ({abs_wc}w); target ~6x--11x Abstract length (~1,100--1,800w).",
+                    f"Introduction ({intro_wc}w) is too close in length to Abstract ({abs_wc}w); expand motivation/positioning while keeping compiled Introduction <= 3 pages.",
                 )
             )
-        elif intro_wc > 2600:
-            findings.append(
-                ContractFinding(
-                    "WARN",
-                    "LengthBalance",
-                    "Abstract/Intro",
-                    f"Introduction ({intro_wc}w) is disproportionately long (>2,600w); tighten motivation so core results keep budget.",
-                )
+    if intro_wc > 1500:
+        findings.append(
+            ContractFinding(
+                "WARN",
+                "IntroLength",
+                "Intro",
+                f"Introduction has {intro_wc} words, which risks exceeding the 3-page ceiling in informs4 spacing; verify compiled PDF stays <= 3 pages and matches exemplar Intro length.",
             )
+        )
 
     return inventory, findings
 

@@ -408,6 +408,53 @@ def _check_fitz_whitespace(
     return findings
 
 
+INTRO_HEAD_RE = re.compile(r"^\s*(?:1\.?\s+)?Introduction\s*$", re.IGNORECASE)
+SEC2_HEAD_RE = re.compile(r"^\s*2\.?\s+[A-Z][A-Za-z0-9\s,&:-]{2,60}$")
+
+
+def _check_intro_page_span(doc: object) -> list[PdfFinding]:
+    """Warn if compiled Introduction spans more than 3 pages."""
+    findings: list[PdfFinding] = []
+    sec1_pos: tuple[int, float] | None = None
+    sec2_pos: tuple[int, float] | None = None
+
+    for idx in range(len(doc)):
+        page = doc[idx]
+        ph = max(1.0, float(page.rect.height))
+        tdict = page.get_text("dict")
+        for block in tdict.get("blocks", []):
+            if block.get("type") != 0:
+                continue
+            for ln in block.get("lines", []):
+                txt = re.sub(r"\s+", " ", "".join(sp.get("text", "") for sp in ln.get("spans", []))).strip()
+                if not txt:
+                    continue
+                y_rel = float(ln.get("bbox", (0, 0, 0, 0))[1]) / ph
+                if sec1_pos is None and INTRO_HEAD_RE.match(txt):
+                    sec1_pos = (idx, y_rel)
+                elif sec1_pos is not None and SEC2_HEAD_RE.match(txt):
+                    if idx > sec1_pos[0] or y_rel > sec1_pos[1]:
+                        sec2_pos = (idx, y_rel)
+                        break
+            if sec2_pos is not None:
+                break
+        if sec2_pos is not None:
+            break
+
+    if sec1_pos is not None and sec2_pos is not None:
+        span_pages = (sec2_pos[0] - sec1_pos[0]) + (sec2_pos[1] - sec1_pos[1])
+        if span_pages > 3.05:
+            findings.append(
+                PdfFinding(
+                    "WARN",
+                    "IntroPageCap",
+                    sec2_pos[0] + 1,
+                    f"Compiled Introduction spans {span_pages:.1f} pages (keep Introduction <= 3.0 pages).",
+                )
+            )
+    return findings
+
+
 def audit_pdf(
     pdf_path: Path,
     log_path: Path | None = None,
@@ -443,6 +490,7 @@ def audit_pdf(
                 findings.extend(_check_fitz_overlaps_and_margins(doc[idx], pnum))
                 next_txt = page_texts[idx + 1] if idx + 1 < total else ""
                 findings.extend(_check_fitz_whitespace(doc[idx], pnum, total, next_txt))
+            findings.extend(_check_intro_page_span(doc))
 
             if render_dir is not None:
                 flagged_pages = sorted({f.page for f in findings if f.page >= 1})

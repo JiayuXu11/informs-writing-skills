@@ -34,7 +34,7 @@ Select the primary mode matching the user's request, load **only** the relevant 
 
 | Mode | When to Use | Load These References First |
 | :--- | :--- | :--- |
-| **Mode A: `0 -> 1` Drafting via Exemplars** | Starting from a core idea, problem, or outline; retrieving legal arXiv/SSRN/faculty-page PDFs to mirror section pacing, sentence-by-sentence Abstract architecture, Abstract/Intro word-count parity (`+/-15%--20%`), theorem-to-prose ratios, and paragraph cadence. | [workflow-write-exemplar.md](./references/workflow-write-exemplar.md), [section-and-lane-architecture.md](./references/section-and-lane-architecture.md), [journals-informs-matrix.md](./references/journals-informs-matrix.md) |
+| **Mode A: `0 -> 1` Drafting via Exemplars** | Starting from a core idea, problem, or outline; retrieving legal arXiv/SSRN/faculty-page PDFs to mirror section pacing, sentence-by-sentence Abstract architecture (`< 270` words), `<= 3`-page Introduction budget, corresponding section word-count parity (`+/-15%--20%` vs. exemplars), theorem-to-prose ratios, and paragraph cadence. | [workflow-write-exemplar.md](./references/workflow-write-exemplar.md), [section-and-lane-architecture.md](./references/section-and-lane-architecture.md), [journals-informs-matrix.md](./references/journals-informs-matrix.md) |
 | **Mode B: Anti-AI Rewriting & Prose Surgery** | Polishing an AI-generated or stiff human draft; pruning notation bloat; fixing cold-start concepts, defensive caveats, raw decimal dumping, definition drift, or chat leakage. | [workflow-rewrite-deai.md](./references/workflow-rewrite-deai.md), [human-craft-and-anti-ai.md](./references/human-craft-and-anti-ai.md), [math-notation-and-appendix.md](./references/math-notation-and-appendix.md) |
 | **Mode C: Referee Calibration, Contract Audit & Journal Retargeting** | Checking cross-section claim consistency, calibrating evidence verbs, preparing identification specs, converting a working paper for submission, or answering referees. | [manuscript-contract-and-reviewer-calibration.md](./references/manuscript-contract-and-reviewer-calibration.md), [empirical-and-identification-craft.md](./references/empirical-and-identification-craft.md), [journals-informs-matrix.md](./references/journals-informs-matrix.md) |
 
@@ -67,7 +67,7 @@ Full specifications live in [journals-informs-matrix.md](./references/journals-i
 | Option | Journal | Abstract & Keywords | Main-Body Length Norm | Appendix & Proof Policy | Editorial Signature & Hard Rules |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `opre` | **Operations Research** | Single-block `\ABSTRACT` + `\SUBJECTCLASS` + `\AREAOFREVIEW` | ~32–36 pp. single-spaced (`<= 35` pp. target incl. refs) | 100% `\ECSwitch` (`Online Appendix EC.x`); pair headline theorems with 3–6 sentence body Proof Sketch | Rigor + surprising methodological or structural payoff; no orphaned formal results |
-| `mnsc` | **Management Science** | Single-block `\ABSTRACT` (<= 200 words) + 3–5 lowercase `\KEYWORDS` + `\HISTORY` | <= 32 pp. (`1.5`-spaced `informs4` single-col incl. refs) | 100% `\ECSwitch` | Broad cross-functional significance; Data & Code Disclosure section; clear practical/managerial insight |
+| `mnsc` | **Management Science** | Single-block `\ABSTRACT` (`< 270` words; check portal limit) + 3–5 lowercase `\KEYWORDS` + `\HISTORY` | <= 32 pp. (`1.5`-spaced `informs4` single-col incl. refs) | 100% `\ECSwitch` | Broad cross-functional significance; Data & Code Disclosure section; clear practical/managerial insight |
 | `msom` | **M&SOM** | Mandatory 3-part structured `\ABSTRACT` (`Problem definition`, `Methodology/results`, `Managerial implications`) | <= 32 pp. manuscript | 100% `\ECSwitch` (**16-page target ceiling** for EC) | Endnotes (`\theendnotes`) instead of bottom-of-page `\footnote`; tight end-to-end operations grounding |
 | `ijoc` | **INFORMS J. on Computing** | Concise single-block `\ABSTRACT` + problem/computational impact | ~30–35 pp. incl. refs | 100% `\ECSwitch` (`Online Appendix EC.x`); algorithmic complexity + key proof sketch in body | OR + CS fusion; formal `algorithm2e` pseudocode; `.cd` **Dual-DOI** Software & Data companion repo protocol (`INFORMSJoC`) |
 
@@ -87,7 +87,7 @@ Run all three verification scripts from the skill root (or pass full paths to yo
    ```
 3. **Cross-Section Contract Drift, Exemplar Length Parity & Online Appendix Placement** (`.tex` or `.md`/`.txt`):
    ```bash
-   python scripts/audit_manuscript_contract.py path/to/main.tex --journal opre --exemplar-abstract-words 180 --exemplar-intro-words 1450
+   python scripts/audit_manuscript_contract.py path/to/main.tex --journal opre --exemplar-abstract-words <N_abs> --exemplar-intro-words <N_intro>
    python scripts/audit_manuscript_contract.py --place-results items.txt --journal ijoc
    ```
 4. **Compiled-PDF Visual Layout, Whitespace & Glyph Gate** (always inspect rendered PNGs via `read_file`):

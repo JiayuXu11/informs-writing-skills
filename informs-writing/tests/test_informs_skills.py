@@ -201,6 +201,23 @@ class TestInformsAudit(unittest.TestCase):
         self.assertIn("TableScaling", warn_cats)
         self.assertIn("NegativeVspace", warn_cats)
 
+    def test_abstract_word_threshold_270(self) -> None:
+        abs_255 = " ".join(["dispatch"] * 255)
+        tex_255 = CLEAN_TEX_BASE.replace(
+            "We study dynamic dispatch when carriers face stochastic travel delays. Using a fluid-limit relaxation and priority coupling, we show that a threshold index rule reduces expected holding costs by roughly 2\\% relative to a greedy FIFO baseline.",
+            abs_255,
+        )
+        cats_255 = {f.category for f in aud.audit_manuscript(tex_255, journal="mnsc")}
+        self.assertNotIn("Abstract", cats_255)
+
+        abs_280 = " ".join(["dispatch"] * 280)
+        tex_280 = CLEAN_TEX_BASE.replace(
+            "We study dynamic dispatch when carriers face stochastic travel delays. Using a fluid-limit relaxation and priority coupling, we show that a threshold index rule reduces expected holding costs by roughly 2\\% relative to a greedy FIFO baseline.",
+            abs_280,
+        )
+        warns_280 = {f.category for f in aud.audit_manuscript(tex_280, journal="mnsc") if f.severity == "WARN"}
+        self.assertIn("Abstract", warns_280)
+
 
 class TestProseCraft(unittest.TestCase):
     def test_craft_rules(self) -> None:
@@ -366,6 +383,44 @@ class TestPdfLayoutAuditor(unittest.TestCase):
             )
             self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
 
+    def test_intro_page_cap_three_pages(self) -> None:
+        import fitz
+
+        with tempfile.TemporaryDirectory() as tmp:
+            # 1) Passing: Intro from Page 1 (y=120) to Page 3 (y=400) -> ~2.35 pages
+            ok_pdf = Path(tmp) / "ok_intro.pdf"
+            doc_ok = fitz.open()
+            for idx in range(4):
+                pg = doc_ok.new_page(width=612, height=792)
+                if idx == 0:
+                    pg.insert_text((72, 120), "1 Introduction", fontsize=12)
+                if idx == 2:
+                    pg.insert_text((72, 400), "2 Model Setup", fontsize=12)
+                for y in range(150, 680, 24):
+                    if not (idx == 2 and y == 400):
+                        pg.insert_text((72, y), f"Body prose line {y} on page {idx + 1}.", fontsize=10.5)
+            doc_ok.save(str(ok_pdf))
+            doc_ok.close()
+            f_ok, _ = pdf_qa.audit_pdf(ok_pdf)
+            self.assertNotIn("IntroPageCap", {f.category for f in f_ok})
+
+            # 2) Flagged: Intro from Page 1 (y=120) to Page 5 (y=200) -> ~4.10 pages
+            long_pdf = Path(tmp) / "long_intro.pdf"
+            doc_long = fitz.open()
+            for idx in range(5):
+                pg = doc_long.new_page(width=612, height=792)
+                if idx == 0:
+                    pg.insert_text((72, 120), "1 Introduction", fontsize=12)
+                if idx == 4:
+                    pg.insert_text((72, 200), "2 Model Setup", fontsize=12)
+                for y in range(150, 680, 24):
+                    if not (idx == 4 and y == 200):
+                        pg.insert_text((72, y), f"Body prose line {y} on page {idx + 1}.", fontsize=10.5)
+            doc_long.save(str(long_pdf))
+            doc_long.close()
+            f_long, _ = pdf_qa.audit_pdf(long_pdf)
+            self.assertIn("IntroPageCap", {f.category for f in f_long})
+
 
 class TestSkillHygieneAndLinks(unittest.TestCase):
     def test_zero_cjk_inside_informs_writing(self) -> None:
@@ -393,6 +448,16 @@ class TestSkillHygieneAndLinks(unittest.TestCase):
                     target.exists(),
                     f"Broken link {rel} inside {md_path} -> {target}",
                 )
+
+    def test_no_legacy_word_count_prescriptions(self) -> None:
+        banned_re = re.compile(r"\b150\s*[–-]\s*210\b|\b1,100\s*[–-]\s*1,800\b")
+        for fp in INFORMS_WRITING_DIR.rglob("*.md"):
+            txt = fp.read_text(encoding="utf-8", errors="replace")
+            m = banned_re.search(txt)
+            self.assertIsNone(
+                m,
+                f"Legacy hardcoded word-count range '{m.group(0) if m else ''}' found in {fp}",
+            )
 
 
 if __name__ == "__main__":

@@ -338,13 +338,13 @@ def audit_abstract(main_body: str, journal: str) -> list[Finding]:
 
     abs_text, line = res
     words = len(re.findall(r"\S+", abs_text))
-    if words > 220:
+    if words >= 270:
         findings.append(
             Finding(
                 "WARN",
                 "Abstract",
                 line,
-                f"Abstract has {words} words (target <= 200 words for INFORMS journals).",
+                f"Abstract has {words} words (generally keep < 270 words and aligned with your exemplar's Abstract word count).",
             )
         )
     if "\\cite" in abs_text:

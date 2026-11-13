@@ -38,6 +38,7 @@ Related Literature lives either inside Section 1 (typical for OR and empirical/a
   - *Results / Proofs*: Minimal external citations; self-referential.
   - **Zero Direct Quotations**: OR/MS cites strictly by paraphrase and positioning; direct block quotes are absent.
   - **Formatting**: `(Author Year)` or `Author (Year)`; multiple citations separated by commas `(Levi et al. 2015, Besbes and Zeevi 2020)`.
+- **Length & Exemplar Calibration**: Keep the Abstract **`< 270` words** (checking submission portal text-box limits when uploading) and keep the compiled **Introduction `<= 3` pages**, using the word counts of corresponding sections in recent target-journal exemplars as your primary reference.
 
 ### 4. Subgenre-Calibrated Epistemic Caution
 - **Theoretical / Mathematical Claims**: Verbal hedges (`might`, `seems`, `perhaps`) do NOT belong in theorem exposition. Express qualification strictly via explicit assumptions, parameter regimes, and comparators (`"Under Assumption 2, Proposition 1 establishes..."`).
@@ -56,7 +57,7 @@ Related Literature lives either inside Section 1 (typical for OR and empirical/a
 #### Enforced Constraints (`[ENFORCED]`) & Practice Norms (`[PRACTICE]`)
 - `[ENFORCED]` **Class & Spacing**: `\documentclass[opre,dblanonrev]{informs4}` (or `nonblindrev`), `\DoubleSpacedXI`.
 - `[ENFORCED]` **Page Cap**: Regular manuscripts **<= 30 pages excluding references** (Lengthy manuscripts `<= 40` pages excluding references, tied to slower review). Target Main Text + Figures/Tables + References `<= 33--35` pages.
-- `[ENFORCED]` **Abstract**: Single unstructured paragraph, **<= 200 words**, zero equations/symbols, zero citations.
+- `[ENFORCED]` **Abstract**: Single unstructured paragraph, generally **`< 270` words** (trim if the online portal enforces a `<= 200` box limit), zero equations/symbols, zero citations.
 - `[ENFORCED]` **Post-Abstract Metadata Block** (in exact order before `\maketitle`):
   1. `\KEYWORDS{...}`
   2. `\SUBJECTCLASS{...}` using official INFORMS OR/MS taxonomy in lowercase (e.g., `inventory/production: stochastic; dynamic programming: Markov`)—never substitute JEL codes.
@@ -76,7 +77,7 @@ Related Literature lives either inside Section 1 (typical for OR and empirical/a
 #### Enforced Constraints (`[ENFORCED]`) & Practice Norms (`[PRACTICE]`)
 - `[ENFORCED]` **Class & Spacing**: `\documentclass[mnsc,dblanonrev]{informs4}`, `\OneAndAHalfSpacedXI` (standard, 33 lines/page) or `\DoubleSpacedXI` (25 lines/page), 11pt, 1-inch margins.
 - `[ENFORCED]` **Page Cap (Revisions & Length Discipline)**: **<= 32 pages** at 1.5-spacing or **<= 47 pages** at double-spacing including Main Text + Figures/Tables + References (Electronic Companion excluded). **Fast Track** pathway: **<= 5,000 words** total outside Online Appendix (~7.7% acceptance, binary revise-or-reject).
-- `[ENFORCED]` **Abstract**: Single unstructured paragraph, **<= 250 words**, zero equations, zero citations.
+- `[ENFORCED]` **Abstract**: Single unstructured paragraph, generally **`< 270` words** (trim if the online portal enforces a `<= 250` box limit), zero equations, zero citations.
 - `[ENFORCED]` **Keywords**: **3–5 keywords**, comma-separated, lowercase except proper nouns and standard abbreviations (`\KEYWORDS{...}`).
 - `[ENFORCED]` **Data and Code Disclosure**: Mandatory disclosure statement/form on initial submission and revisions confirming reproducibility compliance.
 - `[PRACTICE]` **Introduction Sub-Headers**: Published MS introductions routinely use bold non-numbered inline paragraph headers (`\noindent\textbf{Summary of Contributions.}`, `\noindent\textbf{Overview of Results.}`) as visual signposts. Literature review sits in Section 1.2 (empirical/applied) or Section 2 (dense theory).
@@ -93,7 +94,7 @@ Related Literature lives either inside Section 1 (typical for OR and empirical/a
 #### Enforced Constraints (`[ENFORCED]`) & Practice Norms (`[PRACTICE]`)
 - `[ENFORCED]` **Class & Spacing**: `\documentclass[msom,dblanonrev]{informs4}`, `\DoubleSpacedXI` (`<= 33` lines/page, 11pt, 1-inch margins).
 - `[ENFORCED]` **Strict Page Cap**: **<= 32 pages ALL-INCLUSIVE** (body + references + tables + figures). **Online Appendix strictly capped at <= 16 pages** on all new submissions!
-- `[ENFORCED]` **Three-Part Structured Abstract (<= 300 words)**: Single flowing paragraph (not bullets), zero math/citations, containing the three mandatory bold inline labels—even for pure theory papers:
+- `[ENFORCED]` **Three-Part Structured Abstract (`< 270` words target)**: Single flowing paragraph (not bullets), zero math/citations, containing the three mandatory bold inline labels—even for pure theory papers:
   ```latex
   \ABSTRACT{%
     \textbf{Problem definition:} State the operational problem and core tension.
@@ -115,7 +116,7 @@ Related Literature lives either inside Section 1 (typical for OR and empirical/a
 #### Enforced Constraints (`[ENFORCED]`) & Practice Norms (`[PRACTICE]`)
 - `[ENFORCED]` **Class & Spacing**: `\documentclass[ijoc,nonblindrev]{informs4}` (single-column, single-blind review by default), `\DoubleSpacedXI`.
 - `[ENFORCED]` **Page Target**: Concise main body **<= 25 pages** (Main Text + Tables/Figures + References), pushing extended instance logs and parameter sweeps to `Online Appendix EC.x`.
-- `[ENFORCED]` **Abstract**: Single unstructured paragraph, **<= 300 words**, zero equations/citations; state (1) computational challenge, (2) algorithmic/software advance, and (3) empirical speedup or gap reduction.
+- `[ENFORCED]` **Abstract**: Single unstructured paragraph, generally **`< 270` words**, zero equations/citations; state (1) computational challenge, (2) algorithmic/software advance, and (3) empirical speedup or gap reduction.
 - `[ENFORCED]` **Code & Data Repository (Dual-DOI `.cd` Policy)**: Every accepted IJOC paper requires an archival companion repository under `https://github.com/INFORMSJoC` receiving its own `.cd` DOI (e.g., `10.1287/ijoc.2024.0938.cd`) cited alongside the paper DOI, with a standardized README (citation, description, installation, replication instructions, results summary). Embed reproducibility pointers directly inside the `Computational Experiments` section rather than hiding them.
 - `[PRACTICE]` **Paper Type Adaptation (`Algorithm` vs. `Software`)**:
   - *Algorithm / Method papers*: `Introduction` -> `Formulation & Structural Properties` -> `Algorithm` (numbered `algorithm`/`algpseudocode` environments, never buried in prose) -> `Computational Experiments` (full CPU/RAM, threads, solver versions, time limit, benchmark families, exact optimality-gap formulas) -> `Conclusion`.
