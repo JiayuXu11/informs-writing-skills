@@ -1,0 +1,26 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.end
+*.ent
+
+# Temporary annotation snapshots & scratch
+zh_review/annot_snapshots/
+*.tmp
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

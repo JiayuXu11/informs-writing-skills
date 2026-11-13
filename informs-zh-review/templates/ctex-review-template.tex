@@ -1,0 +1,79 @@
+% ==============================================================================
+% Fast Main-Text Chinese Review Template (XeLaTeX + ctexart)
+% Mirrors English INFORMS main text 1-to-1 (excludes Online Appendix).
+% Compile with: xelatex -interaction=nonstopmode -halt-on-error main_zh.tex
+% ==============================================================================
+
+% Synced from ../main.tex @ BASELINE_COMMIT
+\documentclass[UTF8, 11pt, a4paper]{ctexart}
+
+% --- Generous margins for iPad/PDF annotation ---
+\usepackage[top=2.4cm, bottom=2.4cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Math, Theorems, Tables, Graphics, Algorithms ---
+\usepackage{amsmath,amssymb,amsfonts,mathtools,bm}
+\usepackage{amsthm}
+\usepackage{booktabs,threeparttable,multirow}
+\usepackage{graphicx}
+\graphicspath{{../}{../figures/}{../figs/}}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+
+% --- Theorem Environments (Keep numbering parallel to English main.tex) ---
+\theoremstyle{plain}
+\newtheorem{theorem}{定理}
+\newtheorem{proposition}{命题}
+\newtheorem{lemma}{引理}
+\newtheorem{corollary}{推论}
+
+\theoremstyle{definition}
+\newtheorem{definition}{定义}
+\newtheorem{assumption}{假设}
+
+\theoremstyle{remark}
+\newtheorem{remark}{注}
+
+% --- Convenience Macros matching English template ---
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+
+\title{\textbf{论文中文快速审阅版标题（与英文主文一一对应）}}
+\author{审阅模式（已略去 Online Appendix 证明与补充实验）}
+\date{}
+
+\begin{document}
+\maketitle
+
+% [EN-SYNC: main.tex:abstract:p1]
+\begin{abstract}
+本文研究动态定价与库存协同优化问题。在需求存在周期性波动与不确定性的情形下，传统静态策略往往难以兼顾收益与缺货风险。我们构建了一个多周期随机动态规划模型，证明了最优策略具有阈值结构，并提出了一种基于拉格朗日松弛的可计算近似算法。数值结果表明，相比传统启发式基准策略，所提出的自适应阈值策略在保持计算可控的同时，显著缩小了收益差距。
+\end{abstract}
+
+\noindent\textbf{关键词：} 动态定价，库存控制，阈值策略，随机优化
+
+% [EN-SYNC: main.tex:sec1:p1]
+\section{引言 (Introduction)}
+\label{sec:intro}
+
+在零售与平台运营中，决策者需要在需求尚未完全明朗前同时设定库存补货量与销售价格。当供应提前期较长且市场需求呈现显著波动时，静态定价策略无法及时响应库存状态的变化，进而导致缺货损失或期末积压。
+
+% [EN-SYNC: main.tex:sec2:p1]
+\section{模型设定 (Model)}
+\label{sec:model}
+
+考虑一个离散有限周期 $t \in \{1, \dots, T\}$ 的运营系统。在每一期期初，决策者观察当前库存状态 $x_t$ 后选择当期补货量与零售价格，随后随机需求实现并产生相应收益或持有成本。
+
+% [EN-SYNC: main.tex:prop1]
+\begin{proposition}[阈值最优性]
+\label{prop:threshold}
+当期需求分布满足单调失效率条件时，最优定价与补货策略在每一期均保持单阈值结构。
+\end{proposition}
+
+\vspace{1em}
+\noindent\textit{注：Online Appendix（详细证明、辅助引理及补充数值实验）已按快速审阅模式略去。}
+
+\end{document}

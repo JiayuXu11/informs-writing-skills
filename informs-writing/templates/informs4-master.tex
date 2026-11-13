@@ -1,0 +1,163 @@
+% ==============================================================================
+% Unified INFORMS LaTeX Master Template (informs4.cls + Online Appendix)
+% Supported journal options:
+%   opre  - Operations Research           (dblanonrev, \DoubleSpacedXI, <=30pp excl refs)
+%   mnsc  - Management Science            (dblanonrev, \OneAndAHalfSpacedXI, <=32pp)
+%   msom  - M&SOM                         (dblanonrev, \DoubleSpacedXI, <=32pp all-incl)
+%   ijoc  - INFORMS Journal on Computing  (nonblindrev, \DoubleSpacedXI, <=25pp)
+%
+% NOTE: Download informs4.cls and informs2014.bst from INFORMS Author Portal
+% (https://pubsonline.informs.org/authorportal/latex-style-files) into this folder.
+% ==============================================================================
+
+\documentclass[mnsc,dblanonrev]{informs4}
+% Switch between journals by changing the first option above:
+% \documentclass[opre,dblanonrev]{informs4}
+% \documentclass[msom,dblanonrev]{informs4}
+% \documentclass[ijoc,nonblindrev]{informs4}
+
+% --- Line Spacing (select per target journal) ---
+\OneAndAHalfSpacedXI   % Standard for MS (<=32pp)
+% \DoubleSpacedXI      % Required for OR, M&SOM (<=32pp all-inclusive), and IJOC
+
+% --- Citations: INFORMS author-year style, no comma between author & year ---
+\usepackage{natbib}
+\bibpunct[, ]{(}{)}{,}{a}{}{,}
+\def\bibfont{\small}
+\def\bibsep{\smallskipamount}
+\def\bibhang{24pt}
+\def\newblock{\ }
+\def\BIBand{and}
+
+% --- Core Math, Tables, Figures, Algorithms & Cross-References ---
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+\usepackage{booktabs,threeparttable,multirow}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+% Note for msom: bottom-of-page \footnote is prohibited; use parentheses or endnotes:
+% \usepackage{endnotes}
+% \let\footnote=\endnote
+
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+
+% --- Theorem Environments (numbered sequentially in main text & EC) ---
+\TheoremsNumberedThrough
+\ECRepeatTheorems
+\EquationsNumberedThrough
+
+% --- Clean Macros (Keep minimal; zero orphan macros) ---
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\RUNAUTHOR{Author Surname} % Hidden automatically under dblanonrev
+\RUNTITLE{Short Running Title}
+
+\TITLE{Full Paper Title in Title Case}
+
+\ARTICLEAUTHORS{%
+\AUTHOR{First Author}
+\AFF{Department, University, City, State ZIP, \EMAIL{author@university.edu}}
+\AUTHOR{Second Author}
+\AFF{Department, University, City, State ZIP, \EMAIL{coauthor@university.edu}}
+}
+
+% --- Abstract ---
+% OR: <=200 words, 1 paragraph, no math, no citations.
+% MS: <=250 words, 1 paragraph, no math, no citations.
+% IJOC: <=300 words, 1 paragraph, no math, no citations.
+% M&SOM: <=300 words, 1 paragraph with the 3 bold inline labels below:
+%   \textbf{Problem definition:} ...
+%   \textbf{Methodology/results:} ...
+%   \textbf{Managerial implications:} ...
+\ABSTRACT{%
+  State the operational or methodological tension, the central model or empirical
+  object, the headline mechanism and result magnitude in plain language, and
+  the primary regime or managerial implication without equations or citations.
+}
+
+\KEYWORDS{keyword one, keyword two, keyword three, keyword four}
+
+% --- Required ONLY for Operations Research (opre) ---
+% \SUBJECTCLASS{inventory/production: stochastic; dynamic programming: Markov}
+% \AREAOFREVIEW{Operations and Supply Chains}
+
+\maketitle
+
+% ==============================================================================
+\section{Introduction}
+\label{sec:intro}
+% ==============================================================================
+
+% Keep Introduction near-zero notation. Anchor in concrete operational/technical
+% friction -> literature positioning -> central object & spine results -> roadmap (if needed).
+
+% ==============================================================================
+\section{Model}
+\label{sec:model}
+% ==============================================================================
+
+% Introduce notation Just-in-Time in dependency order.
+% Onboard any specialized concept via: Why -> Intuition -> Definition -> Canonical Term.
+
+% Example Theorem + Proof Sketch + Unified Online Appendix Pointer:
+% \begin{proposition}[Threshold Optimality]
+% \label{prop:threshold}
+% Under stationary arrivals, the optimal policy takes a threshold form.
+% \end{proposition}
+%
+% Prose interpreting the proposition and regime boundary...
+% For OR/IJOC (and complex MS/MSOM results), give a 3-6 sentence proof sketch
+% naming the bottleneck and load-bearing trick, then point to Online Appendix EC.1:
+% The complete proof is provided in Online Appendix~\ref{ec:proofs}.
+
+% ==============================================================================
+\section{Numerical Study}
+\label{sec:numerics}
+% ==============================================================================
+
+% Summarize patterns, mechanisms, and clean rounded magnitudes in prose;
+% keep exact decimals inside booktabs tables.
+
+% ==============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% ==============================================================================
+
+% Synthesize core takeaway and frame model boundaries positively as future extensions.
+
+% --- Endnotes (Uncomment ONLY for M&SOM if using endnotes instead of parentheses) ---
+% \theendnotes
+
+\ACKNOWLEDGMENT{%
+  The authors thank the departmental editor, the associate editor, and the
+  anonymous referees for their constructive comments.
+}
+
+\bibliographystyle{informs2014}
+\bibliography{refs}
+
+% ==============================================================================
+% UNIFIED ONLINE APPENDIX (100% of proofs, lemmas, tables, extra numerics)
+% Note: Page count of Main Text + References ends BEFORE \ECSwitch.
+% For M&SOM, Online Appendix must not exceed 16 pages.
+% ==============================================================================
+\clearpage
+\ECSwitch
+\ECHead{Online Appendix for ``Full Paper Title in Title Case''}
+
+\section{Proofs of Main Results}
+\label{ec:proofs}
+
+\begin{proof}{Proof of Proposition~\ref{prop:threshold}.}
+  Write the complete rigorous verification here.
+  \Halmos
+\end{proof}
+
+\section{Additional Numerical Experiments and Robustness Checks}
+\label{ec:numerics}
+
+\end{document}
