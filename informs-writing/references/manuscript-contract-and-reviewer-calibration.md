@@ -64,7 +64,7 @@ Also keep narrow outcome nouns separate: **demand**, **arrival rate**, **purchas
 ### Three-Referee Checklists
 - **Referee 1 (Methodologist)**: Are assumptions explicit with analytical roles? Do proofs/designs genuinely establish every theorem/estimand? Are SE clusters, weak-IV/pre-trend tests, or solver baselines rigorous? Do all main-text proofs have sketches (`opre`/`ijoc`) and complete `Online Appendix EC.x` verification?
 - **Referee 2 (Field Expert)**: Is the core trade-off/lever consequential for OR/MS? Are 3–5 closest papers engaged fairly and accurately (content-verified)? Are effect sizes economically/operationally meaningful relative to baselines?
-- **Referee 3 (Writing Critic)**: Zero AI tells, zero orphan symbols, `<= 2` formal `Definition` blocks, zero prose decimal dumps, zero defensive caveats, zero chat/revision-history leakage, clean `booktabs` tables, and adherence to page cap?
+- **Referee 3 (Writing Critic)**: Zero AI tells, zero orphan symbols, `<= 2` formal `Definition` blocks, front-to-back plain-English onboarding of paper-specific terms in Abstract/Intro, explicit section-to-section and proposition-to-proposition storyline bridges, trend-first numerical prose (zero table/figure readouts), minimal explanatory parentheticals, zero defensive caveats, zero chat/revision-history leakage, clean `booktabs` tables, and adherence to page cap?
 
 ### Working-Paper-to-Journal Compression Order
 When trimming a bloated working paper to hit `opre` (30 pp), `mnsc` (32 pp 1.5x), `msom` (32 pp all-incl. + 16 pp EC), or `ijoc` (25 pp) caps, cut strictly in this sequence:

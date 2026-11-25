@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 mkdir -p "${TARGET_DIR}"
 
-for skill in informs-writing informs-zh-review; do
+for skill in informs-writing informs-zh-review informs-review-loop; do
   rm -rf "${TARGET_DIR}/${skill}"
   cp -r "${REPO_ROOT}/${skill}" "${TARGET_DIR}/${skill}"
   find "${TARGET_DIR}/${skill}" -type d -name "__pycache__" -exec rm -rf {} +

@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
 
-foreach ($skill in @("informs-writing", "informs-zh-review")) {
+foreach ($skill in @("informs-writing", "informs-zh-review", "informs-review-loop")) {
     $src = Join-Path $RepoRoot $skill
     $dst = Join-Path $TargetDir $skill
     if (Test-Path $dst) {

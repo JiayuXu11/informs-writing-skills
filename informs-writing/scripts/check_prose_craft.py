@@ -101,6 +101,37 @@ FALSE_CONCESSION_RE = re.compile(
 
 PROSE_EM_DASH_RE = re.compile(r"(?<!-)---(?!-)|—")
 
+PROSE_PAREN_RE = re.compile(r"\(([^()]{3,240})\)")
+PAREN_REF_PREFIX_RE = re.compile(
+    r"^(?:see\b|cf\.?\b|e\.g\.?,?\s*(?:see|Table|Fig|Section|Online Appendix|Appendix)\b|"
+    r"Tables?\b|Figs?\.?\b|Figures?\b|Secs?\.?\b|Sections?\b|Eqs?\.?\b|Equations?\b|"
+    r"Thms?\.?\b|Theorems?\b|Props?\.?\b|Propositions?\b|Lemmas?\b|Corollaries?\b|"
+    r"Assumptions?\b|Online Appendix\b|Appendix\b|EC\.|Panel\b|Columns?\b|Models?\b|"
+    r"Cases?\b|Steps?\b|Parts?\b)",
+    re.IGNORECASE,
+)
+PAREN_GLOSS_OPENER_RE = re.compile(
+    r"^(?:i\.e\.|that is|meaning|namely|in other words|specifically|"
+    r"or equivalently|equivalently|which means|defined as|referred to as)\b",
+    re.IGNORECASE,
+)
+PAREN_EXPLANATORY_VERB_RE = re.compile(
+    r"\b(?:i\.e\.|that is|meaning|namely|which|because|where|when|since|"
+    r"is|are|was|were|means|refers|denotes|represents|captures|defines)\b",
+    re.IGNORECASE,
+)
+
+DATA_NUMBER_RE = re.compile(
+    r"(?<!\w)(?<!\d\.)(?:\d+\.\d+(?:\s*\\?%)?|\d+\s*\\?%)(?!\.\d)(?!\w)"
+)
+NUMERIC_INLINE_MATH_RE = re.compile(r"(?<!\\)\$([\s+\-\d.,\\%–-]+)(?<!\\)\$")
+NUMERIC_ALLOW_PREFIX_RE = re.compile(
+    r"(?:Section|Sec\.|Table|Tbl\.|Figure|Fig\.|Equation|Eq\.|Theorem|Thm\.|"
+    r"Proposition|Prop\.|Lemma|Corollary|Cor\.|Assumption|EC\.|Appendix|v)\s*$",
+    re.IGNORECASE,
+)
+PVALUE_CONTEXT_RE = re.compile(r"\bp\s*[<>=]\s*0\.\d{2,}", re.IGNORECASE)
+
 ADJ_TRIPLET_RE = re.compile(
     r"\b[a-z]{4,}(?:al|ive|ic|ous|ary|ory)\s*,\s*[a-z]{4,}(?:al|ive|ic|ous|ary|ory)\s*(?:,\s*)?and\s+[a-z]{4,}(?:al|ive|ic|ous|ary|ory)\b",
     re.IGNORECASE,
@@ -127,7 +158,7 @@ def clean_text_for_prose(raw: str) -> str:
     """Strip LaTeX comments, display math, tables, and commands to leave readable prose."""
     lines = []
     for ln in raw.splitlines():
-        m = re.search(r"(?<!\\)%", ln)
+        m = re.search(r"(?<!\\)(?<!\d)%", ln)
         lines.append(ln[: m.start()] if m else ln)
     txt = "\n".join(lines)
     txt = re.sub(
@@ -137,6 +168,7 @@ def clean_text_for_prose(raw: str) -> str:
         flags=re.DOTALL,
     )
     txt = re.sub(r"\$\$.*?\$\$|\\\[.*?\\\]", " ", txt, flags=re.DOTALL)
+    txt = NUMERIC_INLINE_MATH_RE.sub(r" \1 ", txt)
     txt = re.sub(r"(?<!\\)\$[^$\n]+?(?<!\\)\$", " Xmath ", txt)
     txt = re.sub(r"\\(?:cite[tp]?|citeal[tp]|eqref|ref|cref|Cref|label)\{[^}]*\}", " [Ref] ", txt)
     txt = re.sub(r"\\(?:section|subsection|subsubsection|paragraph)\*?\{([^}]*)\}", r"\n\n\1.\n", txt)
@@ -144,6 +176,22 @@ def clean_text_for_prose(raw: str) -> str:
     txt = re.sub(r"\\[a-zA-Z]+\*?(?:\[[^\]]*\])?", " ", txt)
     txt = re.sub(r"[{}]", " ", txt)
     return txt
+
+
+def _classify_prose_parenthetical(inner: str) -> str | None:
+    """Return 'gloss' for an explanatory aside, 'aside' for a multi-word prose parenthetical, or None."""
+    cleaned = re.sub(r"\[Ref\]|Xmath", " ", inner)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    if not cleaned or PAREN_REF_PREFIX_RE.match(cleaned):
+        return None
+    words = re.findall(r"[A-Za-z][A-Za-z'-]*", cleaned)
+    if len(words) < 3:
+        return None
+    if re.search(r"\b(?:19|20)\d{2}[a-z]?\b", cleaned) and not PAREN_EXPLANATORY_VERB_RE.search(cleaned):
+        return None
+    if PAREN_GLOSS_OPENER_RE.match(cleaned) or len(words) >= 6:
+        return "gloss"
+    return "aside"
 
 
 def split_paragraphs(txt: str) -> list[str]:
@@ -167,7 +215,7 @@ def analyze_prose(raw: str, section: str = "paragraph") -> list[CraftIssue]:
 
     # Pre-cleaning checks for prose em-dash (outside % comments / math)
     nocomment = "\n".join(
-        ln[: re.search(r"(?<!\\)%", ln).start()] if re.search(r"(?<!\\)%", ln) else ln
+        ln[: re.search(r"(?<!\\)(?<!\d)%", ln).start()] if re.search(r"(?<!\\)(?<!\d)%", ln) else ln
         for ln in raw.splitlines()
     )
     nomath = re.sub(r"\$\$.*?\$\$|\\\[.*?\\\]|(?<!\\)\$[^$\n]+?(?<!\\)\$", " ", nocomment, flags=re.DOTALL)
@@ -261,6 +309,55 @@ def analyze_prose(raw: str, section: str = "paragraph") -> list[CraftIssue]:
                     "AdjectiveTriplet",
                     loc,
                     f"Decorative adjective triplet ('{m.group(0)}'); keep at most one high-information modifier.",
+                )
+            )
+
+        # Explanatory prose parentheticals & dense parenthetical asides
+        gloss_hits: list[str] = []
+        aside_count = 0
+        for m in PROSE_PAREN_RE.finditer(para):
+            kind = _classify_prose_parenthetical(m.group(1))
+            if kind == "gloss":
+                gloss_hits.append(m.group(0))
+            elif kind == "aside":
+                aside_count += 1
+        for snippet in gloss_hits:
+            issues.append(
+                CraftIssue(
+                    "WARN",
+                    "ParentheticalGloss",
+                    loc,
+                    f"Explanatory parenthetical gloss '{snippet[:70]}'; weave essential explanation into the sentence or a follow-up sentence instead of tacking on (...).",
+                )
+            )
+        if not gloss_hits and aside_count >= 2:
+            issues.append(
+                CraftIssue(
+                    "WARN",
+                    "ParentheticalGloss",
+                    loc,
+                    f"Frequent prose parentheticals ({aside_count} in one paragraph); integrate explanations into main clauses and trim redundant asides.",
+                )
+            )
+
+        # Numeric clutter / point-by-point figure or table transcription
+        num_hits: list[str] = []
+        for m in DATA_NUMBER_RE.finditer(para):
+            prefix = para[max(0, m.start() - 25) : m.start()]
+            if NUMERIC_ALLOW_PREFIX_RE.search(prefix):
+                continue
+            window = para[max(0, m.start() - 15) : min(len(para), m.end() + 5)]
+            if PVALUE_CONTEXT_RE.search(window):
+                continue
+            num_hits.append(m.group(0).replace(r"\%", "%"))
+        if len(num_hits) >= 4:
+            sample = ", ".join(num_hits[:5])
+            issues.append(
+                CraftIssue(
+                    "WARN",
+                    "NumericClutter",
+                    loc,
+                    f"Numeric clutter ({len(num_hits)} decimal/percent values in one paragraph: {sample}); narrate qualitative trends and mechanisms with at most 1--2 headline anchors, leaving exact numbers to the table or figure.",
                 )
             )
 

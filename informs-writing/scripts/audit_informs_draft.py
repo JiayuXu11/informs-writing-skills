@@ -186,7 +186,31 @@ VAGUE_ATTRIBUTION_RE = re.compile(
     re.IGNORECASE,
 )
 
+PROSE_PAREN_RE = re.compile(r"\(([^()]{3,240})\)")
+PAREN_REF_PREFIX_RE = re.compile(
+    r"^(?:see\b|cf\.?\b|e\.g\.?,?\s*(?:see|Table|Fig|Section|Online Appendix|Appendix)\b|"
+    r"Tables?\b|Figs?\.?\b|Figures?\b|Secs?\.?\b|Sections?\b|Eqs?\.?\b|Equations?\b|"
+    r"Thms?\.?\b|Theorems?\b|Props?\.?\b|Propositions?\b|Lemmas?\b|Corollaries?\b|"
+    r"Assumptions?\b|Online Appendix\b|Appendix\b|EC\.|Panel\b|Columns?\b|Models?\b|"
+    r"Cases?\b|Steps?\b|Parts?\b)",
+    re.IGNORECASE,
+)
+PAREN_GLOSS_OPENER_RE = re.compile(
+    r"^(?:i\.e\.|that is|meaning|namely|in other words|specifically|"
+    r"or equivalently|equivalently|which means|defined as|referred to as)\b",
+    re.IGNORECASE,
+)
+PAREN_EXPLANATORY_VERB_RE = re.compile(
+    r"\b(?:i\.e\.|that is|meaning|namely|which|because|where|when|since|"
+    r"is|are|was|were|means|refers|denotes|represents|captures|defines)\b",
+    re.IGNORECASE,
+)
+
 DECIMAL_DUMP_RE = re.compile(r"\b\d+\.\d{2,}\b(?:\s*%)?")
+DATA_NUMBER_RE = re.compile(
+    r"(?<!\w)(?<!\d\.)(?:\d+\.\d+(?:\s*\\?%)?|\d+\s*\\?%)(?!\.\d)(?!\w)"
+)
+NUMERIC_INLINE_MATH_RE = re.compile(r"(?<!\\)\$([\s+\-\d.,\\%–-]+)(?<!\\)\$")
 
 STANDARD_META_COMMANDS = {
     "abstract", "keywords", "subjectclass", "areaofreview", "history", "author", "title",
@@ -279,7 +303,9 @@ def extract_brace_arg(text: str, macro: str) -> tuple[str, int] | None:
     return None
 
 
-def extract_prose_without_tables_or_math(main_body: str) -> str:
+def extract_prose_without_tables_or_math(
+    main_body: str, *, keep_numeric_scalars: bool = False
+) -> str:
     """Mask tables, algorithms, math blocks, inline math, URLs, and code spans while preserving newlines."""
     masked = strip_references_section(main_body)
     env_names = (
@@ -295,6 +321,8 @@ def extract_prose_without_tables_or_math(main_body: str) -> str:
     )
     masked = re.sub(r"\$\$.*?\$\$", _blank_preserving_newlines, masked, flags=re.DOTALL)
     masked = re.sub(r"\\\[.*?\\\]", _blank_preserving_newlines, masked, flags=re.DOTALL)
+    if keep_numeric_scalars:
+        masked = NUMERIC_INLINE_MATH_RE.sub(lambda m: " " + m.group(1) + " ", masked)
     masked = re.sub(r"(?<!\\)\$[^$\n]+?(?<!\\)\$", _blank_preserving_newlines, masked)
     masked = re.sub(
         r"\\(?:url|href|texttt|cite[tp]?|citeal[tp]|eqref|ref|cref|Cref|label)\{[^}]*\}",
@@ -338,13 +366,107 @@ def audit_abstract(main_body: str, journal: str) -> list[Finding]:
 
     abs_text, line = res
     words = len(re.findall(r"\S+", abs_text))
-    if words >= 270:
+    if journal == "opre":
+        if words > 200:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "Journal-OR",
+                    line,
+                    f"Operations Research caps \\ABSTRACT{{...}} at <= 200 words (found {words}).",
+                )
+            )
+        if re.search(r"\n\s*\n", abs_text.strip()) or re.search(r"\\par\b", abs_text):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "Journal-OR",
+                    line,
+                    "Operations Research requires a single-paragraph \\ABSTRACT{...}.",
+                )
+            )
+    elif journal == "mnsc":
+        if words > 250:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "Journal-MS",
+                    line,
+                    f"Management Science caps \\ABSTRACT{{...}} at <= 250 words (found {words}).",
+                )
+            )
+        if re.search(r"\n\s*\n", abs_text.strip()) or re.search(r"\\par\b", abs_text):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "Journal-MS",
+                    line,
+                    "Management Science requires a single-paragraph \\ABSTRACT{...}.",
+                )
+            )
+    elif journal == "msom":
+        if words > 300:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "MSOM-Abstract",
+                    line,
+                    f"M&SOM caps the structured \\ABSTRACT{{...}} at <= 300 words (found {words}).",
+                )
+            )
+        if re.search(r"\n\s*\n", abs_text.strip()) or re.search(r"\\par\b", abs_text):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "MSOM-Abstract",
+                    line,
+                    "M&SOM requires a single flowing structured \\ABSTRACT{...} paragraph.",
+                )
+            )
+    elif journal == "ijoc":
+        if words > 300:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "Journal-IJOC",
+                    line,
+                    f"IJOC caps \\ABSTRACT{{...}} at <= 300 words (found {words}).",
+                )
+            )
+        elif words >= 270:
+            findings.append(
+                Finding(
+                    "WARN",
+                    "Abstract",
+                    line,
+                    f"Abstract has {words} words (keep < 270 words target and aligned with your exemplar's Abstract word count).",
+                )
+            )
+        if re.search(r"\n\s*\n", abs_text.strip()) or re.search(r"\\par\b", abs_text):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    "Journal-IJOC",
+                    line,
+                    "IJOC requires a single-paragraph \\ABSTRACT{...}.",
+                )
+            )
+    elif words >= 270:
         findings.append(
             Finding(
                 "WARN",
                 "Abstract",
                 line,
                 f"Abstract has {words} words (generally keep < 270 words and aligned with your exemplar's Abstract word count).",
+            )
+        )
+    if re.search(r"(?<!\\)\$|\\\(", abs_text):
+        findings.append(
+            Finding(
+                "ERROR",
+                "Abstract",
+                line,
+                "Mathematical formulas inside \\ABSTRACT{...} are prohibited in INFORMS style.",
             )
         )
     if "\\cite" in abs_text:
@@ -384,6 +506,15 @@ def audit_journal_rules(main_body: str, journal: str) -> list[Finding]:
     words = prose_word_count(main_body)
 
     if journal == "opre":
+        if re.search(r"\\documentclass\[[^\]]*\bnonblindrev\b", main_body):
+            findings.append(
+                Finding(
+                    "WARN",
+                    "Journal-OR",
+                    1,
+                    "Operations Research uses double-anonymous review on initial submission; use 'dblanonrev' and anonymize both main text and E-Companion (strip authors, affiliations, acknowledgments, grants, and first-person self-citations) unless preparing the final accepted version.",
+                )
+            )
         if r"\SUBJECTCLASS" not in main_body:
             findings.append(
                 Finding("ERROR", "Journal-OR", 1, "Operations Research requires \\SUBJECTCLASS{...}.")
@@ -410,6 +541,15 @@ def audit_journal_rules(main_body: str, journal: str) -> list[Finding]:
                 )
 
     elif journal == "mnsc":
+        if re.search(r"\\documentclass\[[^\]]*\bnonblindrev\b", main_body):
+            findings.append(
+                Finding(
+                    "WARN",
+                    "Journal-MS",
+                    1,
+                    "Management Science uses double-anonymous review; use 'dblanonrev' and omit any identifying title page, acknowledgments, funding, or first-person self-citations unless preparing the final accepted version.",
+                )
+            )
         kw = extract_brace_arg(main_body, "KEYWORDS")
         if not kw:
             findings.append(
@@ -429,6 +569,15 @@ def audit_journal_rules(main_body: str, journal: str) -> list[Finding]:
                 )
 
     elif journal == "msom":
+        if re.search(r"\\documentclass\[[^\]]*\bnonblindrev\b", main_body):
+            findings.append(
+                Finding(
+                    "WARN",
+                    "Journal-MSOM",
+                    1,
+                    "M&SOM uses double-anonymous review; use 'dblanonrev' and anonymize both the main manuscript and the <= 16-page online supplement unless preparing the final accepted version.",
+                )
+            )
         for m in re.finditer(r"\\footnote\s*\{", main_body):
             findings.append(
                 Finding(
@@ -439,31 +588,49 @@ def audit_journal_rules(main_body: str, journal: str) -> list[Finding]:
                 )
             )
 
-    elif journal == "ijoc" and words >= 250:
-        has_algo = bool(
-            re.search(r"\\begin\{(?:algorithm|algorithm2e|algorithmic)\}", main_body)
-        )
-        has_repo = bool(
-            re.search(r"INFORMSJoC|\.cd\b|GitHub|repository|companion\s+(?:code|data)", main_body, re.IGNORECASE)
-        )
-        if not has_algo:
+    elif journal == "ijoc":
+        kw = extract_brace_arg(main_body, "KEYWORDS")
+        if not kw:
             findings.append(
-                Finding(
-                    "WARN",
-                    "Journal-IJOC",
-                    1,
-                    "IJOC computational papers normally include a formal algorithm block (algorithm2e/algorithmic).",
-                )
+                Finding("WARN", "Journal-IJOC", 1, "IJOC expects \\KEYWORDS{...} with 3--5 keywords.")
             )
-        if not has_repo:
-            findings.append(
-                Finding(
-                    "WARN",
-                    "Journal-IJOC",
-                    1,
-                    "IJOC expects Software/Data & Reproducibility repo disclosure (INFORMSJoC Dual-DOI / .cd protocol).",
+        else:
+            kw_text, line = kw
+            items = [item.strip() for item in re.split(r"[;,]", kw_text) if item.strip()]
+            if not (3 <= len(items) <= 5):
+                findings.append(
+                    Finding(
+                        "WARN",
+                        "Journal-IJOC",
+                        line,
+                        f"IJOC expects 3--5 keywords; found {len(items)}.",
+                    )
                 )
+        if words >= 250:
+            has_algo = bool(
+                re.search(r"\\begin\{(?:algorithm|algorithm2e|algorithmic)\}", main_body)
             )
+            has_repo = bool(
+                re.search(r"INFORMSJoC|\.cd\b|GitHub|repository|companion\s+(?:code|data)", main_body, re.IGNORECASE)
+            )
+            if not has_algo:
+                findings.append(
+                    Finding(
+                        "WARN",
+                        "Journal-IJOC",
+                        1,
+                        "IJOC computational papers normally include a formal algorithm block (algorithm2e/algorithmic).",
+                    )
+                )
+            if not has_repo:
+                findings.append(
+                    Finding(
+                        "WARN",
+                        "Journal-IJOC",
+                        1,
+                        "IJOC expects Software/Data & Reproducibility repo disclosure (INFORMSJoC Dual-DOI / .cd protocol).",
+                    )
+                )
 
     return findings
 
@@ -652,6 +819,33 @@ def audit_definition_discipline(main_body: str) -> list[Finding]:
             )
         )
 
+    # Disease 2 (advisory): consecutive propositions/theorems stacked with little or no storyline bridge
+    result_blocks = list(
+        re.finditer(
+            r"\\begin\{(theorem|proposition|corollary)\}.*?\\end\{\1\}",
+            body,
+            flags=re.DOTALL,
+        )
+    )
+    for prev_m, next_m in zip(result_blocks, result_blocks[1:]):
+        between = body[prev_m.end() : next_m.start()]
+        if re.search(r"\\(?:sub)*section\*?\{", between):
+            continue
+        between_no_proof = re.sub(
+            r"\\begin\{proof\}.*?\\end\{proof\}", " ", between, flags=re.DOTALL
+        )
+        between_plain = re.sub(r"\\[a-zA-Z]+\*?(?:\[[^\]]*\])?(?:\{[^}]*\})?", " ", between_no_proof)
+        bridge_words = re.findall(r"\b[A-Za-z]{2,}\b", between_plain)
+        if len(bridge_words) < 15:
+            findings.append(
+                Finding(
+                    "WARN",
+                    "UnbridgedResult",
+                    line_of_offset(body, next_m.start()),
+                    f"Consecutive \\begin{{{next_m.group(1)}}} follows \\end{{{prev_m.group(1)}}} with only {len(bridge_words)} bridging prose word(s); add a storyline transition explaining what the prior result settled or left open and why this next result is needed.",
+                )
+            )
+
     # Disease 6: too many formal definitions + duplicate concepts
     defs = list(
         re.finditer(r"\\begin\{definition\}(.*?)\\end\{definition\}", body, flags=re.DOTALL)
@@ -705,6 +899,22 @@ def _is_allowed_decimal(prose: str, m: re.Match[str]) -> bool:
     return False
 
 
+def _classify_prose_parenthetical(inner: str) -> str | None:
+    """Return 'gloss' for an explanatory aside, 'aside' for a multi-word prose parenthetical, or None."""
+    cleaned = re.sub(r"\\[a-zA-Z]+\*?(?:\[[^\]]*\])?", " ", inner)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    if not cleaned or PAREN_REF_PREFIX_RE.match(cleaned):
+        return None
+    words = re.findall(r"[A-Za-z][A-Za-z'-]*", cleaned)
+    if len(words) < 3:
+        return None
+    if re.search(r"\b(?:19|20)\d{2}[a-z]?\b", cleaned) and not PAREN_EXPLANATORY_VERB_RE.search(cleaned):
+        return None
+    if PAREN_GLOSS_OPENER_RE.match(cleaned) or len(words) >= 6:
+        return "gloss"
+    return "aside"
+
+
 def audit_prose_patterns(main_body: str, journal: str) -> list[Finding]:
     """Diseases 3, 4, 5, 7 plus advisory copula/vague-attribution signals."""
     findings: list[Finding] = []
@@ -752,7 +962,7 @@ def audit_prose_patterns(main_body: str, journal: str) -> list[Finding]:
                 "ERROR",
                 "EmDash",
                 line_of_offset(main_body, m.start()),
-                "Prose em-dash ('---' or '—') forbidden; rewrite with commas, parentheses, colons, or a second sentence (en-dash '--' is for ranges only).",
+                "Prose em-dash ('---' or '—') forbidden; rewrite with commas, colons, or a second sentence (en-dash '--' is for ranges only).",
             )
         )
 
@@ -852,6 +1062,68 @@ def audit_prose_patterns(main_body: str, journal: str) -> list[Finding]:
                 f"Vague attribution '{m.group(0)}'; cite specific authors with \\citet{{...}}.",
             )
         )
+
+    # Disease 3 (advisory): minimize explanatory prose parentheticals & dense aside chains
+    doc_start = prose.find(r"\begin{document}")
+    body_offset = doc_start if doc_start != -1 else 0
+    body_prose = prose[body_offset:]
+    for pm in re.finditer(r"(?:[^\n]*\S[^\n]*\n?)+", body_prose):
+        p_text = pm.group(0)
+        p_base = body_offset + pm.start()
+        gloss_hits: list[tuple[int, str]] = []
+        aside_hits: list[tuple[int, str]] = []
+        for m in PROSE_PAREN_RE.finditer(p_text):
+            kind = _classify_prose_parenthetical(m.group(1))
+            snippet = re.sub(r"\s+", " ", m.group(0)).strip()
+            if kind == "gloss":
+                gloss_hits.append((p_base + m.start(), snippet))
+            elif kind == "aside":
+                aside_hits.append((p_base + m.start(), snippet))
+        for pos, snippet in gloss_hits:
+            findings.append(
+                Finding(
+                    "WARN",
+                    "ParentheticalGloss",
+                    line_of_offset(main_body, pos),
+                    f"Explanatory parenthetical gloss '{snippet[:70]}'; weave essential explanation into the sentence or a follow-up sentence instead of tacking on (...).",
+                )
+            )
+        if not gloss_hits and len(aside_hits) >= 2:
+            findings.append(
+                Finding(
+                    "WARN",
+                    "ParentheticalGloss",
+                    line_of_offset(main_body, aside_hits[1][0]),
+                    f"Frequent prose parentheticals ({len(aside_hits)} in one paragraph); integrate explanations into main clauses and trim redundant asides.",
+                )
+            )
+
+    # Disease 5 (advisory): numeric clutter / point-by-point figure or table transcription
+    num_prose = extract_prose_without_tables_or_math(main_body, keep_numeric_scalars=True)
+    num_start = num_prose.find(r"\begin{document}")
+    num_offset = num_start if num_start != -1 else 0
+    for pm in re.finditer(r"(?:[^\n]*\S[^\n]*\n?)+", num_prose[num_offset:]):
+        p_text = pm.group(0)
+        p_base = num_offset + pm.start()
+        num_hits: list[tuple[int, str]] = []
+        for m in DATA_NUMBER_RE.finditer(p_text):
+            prefix = p_text[max(0, m.start() - 25) : m.start()]
+            if DECIMAL_ALLOW_PREFIX_RE.search(prefix):
+                continue
+            window = p_text[max(0, m.start() - 15) : min(len(p_text), m.end() + 5)]
+            if PVALUE_CONTEXT_RE.search(window):
+                continue
+            num_hits.append((p_base + m.start(), m.group(0).replace(r"\%", "%")))
+        if len(num_hits) >= 4:
+            sample = ", ".join(val for _, val in num_hits[:5])
+            findings.append(
+                Finding(
+                    "WARN",
+                    "NumericClutter",
+                    line_of_offset(main_body, num_hits[3][0]),
+                    f"Numeric clutter ({len(num_hits)} decimal/percent values in one paragraph: {sample}); narrate qualitative trends and mechanisms with at most 1--2 headline anchors, leaving exact numbers to the table or figure.",
+                )
+            )
     return findings
 
 

@@ -129,6 +129,30 @@ class TestInformsAudit(unittest.TestCase):
         self.assertIn("DefinitionBloat", cats2)
         self.assertIn("DuplicateDefinition", cats2)
 
+        stacked_props = CLEAN_TEX_BASE.replace(
+            r"\section{Conclusion}",
+            "To characterize optimal dispatch, we begin with the short-lead-time benchmark.\n"
+            "\\begin{proposition}Short lead times admit a threshold rule.\\end{proposition}\n"
+            "Next we state Proposition 2.\n"
+            "\\begin{proposition}Long lead times compress the feedback gain.\\end{proposition}\n"
+            "\\section{Conclusion}",
+        )
+        stacked_warns = {f.category for f in aud.audit_manuscript(stacked_props) if f.severity == "WARN"}
+        self.assertIn("UnbridgedResult", stacked_warns)
+
+        bridged_props = CLEAN_TEX_BASE.replace(
+            r"\section{Conclusion}",
+            "To characterize optimal dispatch, we begin with the short-lead-time benchmark.\n"
+            "\\begin{proposition}Short lead times admit a threshold rule.\\end{proposition}\n"
+            "Proposition 1 settles the short-lead-time regime where on-hand stock never expires in transit, "
+            "leaving open how the optimal policy shifts once lead time exceeds shelf life. "
+            "To resolve that long-lead-time bottleneck, our next result bounds the remaining value of state feedback.\n"
+            "\\begin{proposition}Long lead times compress the feedback gain.\\end{proposition}\n"
+            "\\section{Conclusion}",
+        )
+        bridged_warns = {f.category for f in aud.audit_manuscript(bridged_props) if f.severity == "WARN"}
+        self.assertNotIn("UnbridgedResult", bridged_warns)
+
     def test_disease_3_4_5_7_hard_blocks(self) -> None:
         injected = CLEAN_TEX_BASE.replace(
             "Online freight marketplaces assign incoming orders to drivers under uncertain transit times.",
@@ -207,7 +231,7 @@ class TestInformsAudit(unittest.TestCase):
             "We study dynamic dispatch when carriers face stochastic travel delays. Using a fluid-limit relaxation and priority coupling, we show that a threshold index rule reduces expected holding costs by roughly 2\\% relative to a greedy FIFO baseline.",
             abs_255,
         )
-        cats_255 = {f.category for f in aud.audit_manuscript(tex_255, journal="mnsc")}
+        cats_255 = {f.category for f in aud.audit_manuscript(tex_255, journal="ijoc")}
         self.assertNotIn("Abstract", cats_255)
 
         abs_280 = " ".join(["dispatch"] * 280)
@@ -215,8 +239,140 @@ class TestInformsAudit(unittest.TestCase):
             "We study dynamic dispatch when carriers face stochastic travel delays. Using a fluid-limit relaxation and priority coupling, we show that a threshold index rule reduces expected holding costs by roughly 2\\% relative to a greedy FIFO baseline.",
             abs_280,
         )
-        warns_280 = {f.category for f in aud.audit_manuscript(tex_280, journal="mnsc") if f.severity == "WARN"}
+        warns_280 = {f.category for f in aud.audit_manuscript(tex_280, journal="ijoc") if f.severity == "WARN"}
         self.assertIn("Abstract", warns_280)
+
+
+    def test_parenthetical_gloss_warnings_and_carveouts(self) -> None:
+        gloss_tex = CLEAN_TEX_BASE.replace(
+            "Online freight marketplaces assign incoming orders to drivers under uncertain transit times.",
+            "Online freight marketplaces assign incoming orders under a threshold rule "
+            "(that is, a policy that dispatches orders once backlog exceeds a cutoff).",
+        )
+        warn_cats = {f.category for f in aud.audit_manuscript(gloss_tex, journal="mnsc") if f.severity == "WARN"}
+        self.assertIn("ParentheticalGloss", warn_cats)
+
+        dense_tex = CLEAN_TEX_BASE.replace(
+            "Online freight marketplaces assign incoming orders to drivers under uncertain transit times.",
+            "Carriers apply a dispatch cutoff (the daily backlog threshold) during demand surges (the evening delivery peak).",
+        )
+        dense_warns = {f.category for f in aud.audit_manuscript(dense_tex, journal="mnsc") if f.severity == "WARN"}
+        self.assertIn("ParentheticalGloss", dense_warns)
+
+        clean_carveouts = CLEAN_TEX_BASE.replace(
+            "Online freight marketplaces assign incoming orders to drivers under uncertain transit times.",
+            "Carriers solve a mixed-integer linear program (MILP) following prior work "
+            "(Levi et al. 2015, Besbes and Zeevi 2020) and benchmark costs (Table 1; see Online Appendix EC.1).",
+        )
+        carveout_warns = {f.category for f in aud.audit_manuscript(clean_carveouts, journal="mnsc") if f.severity == "WARN"}
+        self.assertNotIn("ParentheticalGloss", carveout_warns)
+
+    def test_numeric_clutter_warnings_and_trend_prose_carveouts(self) -> None:
+        cluttered_tex = CLEAN_TEX_BASE.replace(
+            "Online freight marketplaces assign incoming orders to drivers under uncertain transit times.",
+            "In Panel A, raising $L$ from 1 to 5 causes excess cost to jump from 5.1 (5.6\\%) to 20.7 (+21\\%), "
+            "while the open-loop gap narrows from 9.3 at $L=1$ to 4.4 at $L=2$, 2.1 at $L=3$, and 0.6 at $L=5$.",
+        )
+        warn_cats = {f.category for f in aud.audit_manuscript(cluttered_tex, journal="mnsc") if f.severity == "WARN"}
+        self.assertIn("NumericClutter", warn_cats)
+
+        trend_tex = CLEAN_TEX_BASE.replace(
+            "Online freight marketplaces assign incoming orders to drivers under uncertain transit times.",
+            "As lead time grows relative to shelf life, the age-blind benchmark deteriorates sharply, increasing "
+            "excess cost roughly fourfold, whereas the state-feedback advantage steadily narrows (Table 1).",
+        )
+        trend_warns = {f.category for f in aud.audit_manuscript(trend_tex, journal="mnsc") if f.severity == "WARN"}
+        self.assertNotIn("NumericClutter", trend_warns)
+
+    def test_opre_official_guidelines_checks(self) -> None:
+        orig_abs = "We study dynamic dispatch when carriers face stochastic travel delays. Using a fluid-limit relaxation and priority coupling, we show that a threshold index rule reduces expected holding costs by roughly 2\\% relative to a greedy FIFO baseline."
+        opre_base = CLEAN_TEX_BASE.replace("[mnsc,nonblindrev]", "[opre,dblanonrev]")
+
+        # 195-word single-paragraph abstract passes for opre
+        ok_195 = opre_base.replace(orig_abs, " ".join(["dispatch"] * 195))
+        errs_195 = [f for f in aud.audit_manuscript(ok_195, journal="opre") if f.severity == "ERROR"]
+        self.assertEqual(errs_195, [], f"Expected 0 ERRORs for 195-word OPRE abstract, got {errs_195}")
+
+        # 205-word abstract fails hard for opre (and contract auditor)
+        bad_205 = opre_base.replace(orig_abs, " ".join(["dispatch"] * 205))
+        err_cats = {f.category for f in aud.audit_manuscript(bad_205, journal="opre") if f.severity == "ERROR"}
+        self.assertIn("Journal-OR", err_cats)
+        _inv, c_findings = contract.audit_contract("# Abstract\n" + " ".join(["word"] * 205), journal="opre")
+        self.assertTrue(any(f.severity == "ERROR" and f.category == "AbstractLength" for f in c_findings))
+
+        # Multi-paragraph abstract and math in abstract fail hard for opre
+        bad_multi = opre_base.replace(orig_abs, "First paragraph with math $x > 0$.\n\nSecond paragraph.")
+        multi_errs = {f.category for f in aud.audit_manuscript(bad_multi, journal="opre") if f.severity == "ERROR"}
+        self.assertIn("Journal-OR", multi_errs)
+        self.assertIn("Abstract", multi_errs)
+
+        # nonblindrev emits double-anonymous advisory warning for opre
+        nonblind_warns = {f.category for f in aud.audit_manuscript(CLEAN_TEX_BASE, journal="opre") if f.severity == "WARN"}
+        self.assertIn("Journal-OR", nonblind_warns)
+
+    def test_mnsc_official_guidelines_checks(self) -> None:
+        orig_abs = "We study dynamic dispatch when carriers face stochastic travel delays. Using a fluid-limit relaxation and priority coupling, we show that a threshold index rule reduces expected holding costs by roughly 2\\% relative to a greedy FIFO baseline."
+        mnsc_base = CLEAN_TEX_BASE.replace("[mnsc,nonblindrev]", "[mnsc,dblanonrev]")
+
+        # 245-word single-paragraph abstract passes for mnsc
+        ok_245 = mnsc_base.replace(orig_abs, " ".join(["dispatch"] * 245))
+        errs_245 = [f for f in aud.audit_manuscript(ok_245, journal="mnsc") if f.severity == "ERROR"]
+        self.assertEqual(errs_245, [], f"Expected 0 ERRORs for 245-word MNSC abstract, got {errs_245}")
+
+        # 255-word abstract fails hard for mnsc (and contract auditor)
+        bad_255 = mnsc_base.replace(orig_abs, " ".join(["dispatch"] * 255))
+        err_cats = {f.category for f in aud.audit_manuscript(bad_255, journal="mnsc") if f.severity == "ERROR"}
+        self.assertIn("Journal-MS", err_cats)
+        _inv, c_findings = contract.audit_contract("# Abstract\n" + " ".join(["word"] * 255), journal="mnsc")
+        self.assertTrue(any(f.severity == "ERROR" and f.category == "AbstractLength" for f in c_findings))
+
+        # Multi-paragraph abstract fails hard for mnsc
+        bad_multi = mnsc_base.replace(orig_abs, "First paragraph.\n\nSecond paragraph.")
+        multi_errs = {f.category for f in aud.audit_manuscript(bad_multi, journal="mnsc") if f.severity == "ERROR"}
+        self.assertIn("Journal-MS", multi_errs)
+
+        # nonblindrev emits double-anonymous advisory warning for mnsc
+        nonblind_warns = {f.category for f in aud.audit_manuscript(CLEAN_TEX_BASE, journal="mnsc") if f.severity == "WARN"}
+        self.assertIn("Journal-MS", nonblind_warns)
+
+    def test_msom_and_ijoc_official_guidelines_checks(self) -> None:
+        orig_abs = "We study dynamic dispatch when carriers face stochastic travel delays. Using a fluid-limit relaxation and priority coupling, we show that a threshold index rule reduces expected holding costs by roughly 2\\% relative to a greedy FIFO baseline."
+
+        # M&SOM: 290-word 3-part structured abstract passes cleanly with dblanonrev
+        msom_base = CLEAN_TEX_BASE.replace("[mnsc,nonblindrev]", "[msom,dblanonrev]")
+        msom_290_abs = (
+            "\\textbf{Problem definition:} " + " ".join(["dispatch"] * 90)
+            + " \\textbf{Methodology/results:} " + " ".join(["routing"] * 100)
+            + " \\textbf{Managerial implications:} " + " ".join(["capacity"] * 90)
+        )
+        ok_msom = msom_base.replace(orig_abs, msom_290_abs)
+        errs_msom = [f for f in aud.audit_manuscript(ok_msom, journal="msom") if f.severity == "ERROR"]
+        self.assertEqual(errs_msom, [], f"Expected 0 ERRORs for 290-word MSOM structured abstract, got {errs_msom}")
+
+        # M&SOM: >300-word abstract fails hard in both draft and contract auditors
+        bad_msom_310 = msom_base.replace(orig_abs, msom_290_abs + " " + " ".join(["policy"] * 30))
+        msom_errs = {f.category for f in aud.audit_manuscript(bad_msom_310, journal="msom") if f.severity == "ERROR"}
+        self.assertIn("MSOM-Abstract", msom_errs)
+        _inv, c_msom = contract.audit_contract("# Abstract\n" + " ".join(["word"] * 305), journal="msom")
+        self.assertTrue(any(f.severity == "ERROR" and f.category == "AbstractLength" for f in c_msom))
+
+        # M&SOM: nonblindrev triggers double-anonymous WARN
+        msom_nonblind_warns = {f.category for f in aud.audit_manuscript(CLEAN_TEX_BASE, journal="msom") if f.severity == "WARN"}
+        self.assertIn("Journal-MSOM", msom_nonblind_warns)
+
+        # IJOC: single-blind nonblindrev does NOT trigger a double-anonymous warning; >300w or multi-paragraph fails hard
+        ijoc_base = CLEAN_TEX_BASE.replace("[mnsc,nonblindrev]", "[ijoc,nonblindrev]")
+        ijoc_findings = aud.audit_manuscript(ijoc_base, journal="ijoc")
+        self.assertEqual([f for f in ijoc_findings if f.severity == "ERROR"], [])
+        self.assertFalse(any("double-anonymous" in f.message.lower() for f in ijoc_findings))
+
+        bad_ijoc_310 = ijoc_base.replace(orig_abs, " ".join(["solver"] * 310))
+        ijoc_errs = {f.category for f in aud.audit_manuscript(bad_ijoc_310, journal="ijoc") if f.severity == "ERROR"}
+        self.assertIn("Journal-IJOC", ijoc_errs)
+        bad_ijoc_multi = ijoc_base.replace(orig_abs, "First paragraph.\n\nSecond paragraph.")
+        self.assertIn("Journal-IJOC", {f.category for f in aud.audit_manuscript(bad_ijoc_multi, journal="ijoc") if f.severity == "ERROR"})
+        _inv2, c_ijoc = contract.audit_contract("# Abstract\n" + " ".join(["word"] * 305), journal="ijoc")
+        self.assertTrue(any(f.severity == "ERROR" and f.category == "AbstractLength" for f in c_ijoc))
 
 
 class TestProseCraft(unittest.TestCase):
@@ -241,6 +397,37 @@ class TestProseCraft(unittest.TestCase):
             "RepetitiveOpeners",
         ):
             self.assertIn(expected, cats, f"Expected {expected}, got {cats}")
+
+    def test_parenthetical_gloss_craft_check(self) -> None:
+        bad = (
+            "The retailer adopts a threshold rule (meaning it ships orders whenever backlog exceeds a cutoff). "
+            "This policy stabilizes daily throughput."
+        )
+        bad_cats = {i.category for i in craft.analyze_prose(bad, section="model")}
+        self.assertIn("ParentheticalGloss", bad_cats)
+
+        good = (
+            "The retailer solves a mixed-integer linear program (MILP) following standard queueing models "
+            "(Smith 2020, Chen and Lee 2022) and summarizes benchmark costs (Table 2)."
+        )
+        good_cats = {i.category for i in craft.analyze_prose(good, section="model")}
+        self.assertNotIn("ParentheticalGloss", good_cats)
+
+    def test_numeric_clutter_craft_check(self) -> None:
+        bad = (
+            "Extending shelf life expands the savings gap from 4.4 to 16.8, a 22% reduction below the open-loop rule, "
+            "while the base-stock excess shrinks from 10.0 to 1.3 (2.2%)."
+        )
+        bad_cats = {i.category for i in craft.analyze_prose(bad, section="results")}
+        self.assertIn("NumericClutter", bad_cats)
+
+        good = (
+            "Extending shelf life widens the advantage of state feedback roughly fourfold relative to open-loop control, "
+            "because surviving cohorts persist longer and carry greater replenishment value (Table 2, Figure 3b). "
+            "In Section 4.1, these estimates remain significant (p = 0.012)."
+        )
+        good_cats = {i.category for i in craft.analyze_prose(good, section="results")}
+        self.assertNotIn("NumericClutter", good_cats)
 
 
 class TestContractAuditor(unittest.TestCase):

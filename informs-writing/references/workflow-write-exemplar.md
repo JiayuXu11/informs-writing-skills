@@ -38,9 +38,9 @@ Extract three layers from the exemplars before touching `.tex`:
 
 ### Layer 1: Macro Architecture, Section Word-Count Reference & Online Appendix Split
 - Section sequence, subsection depth, where Related Literature lives (§1.2 vs §2), and what proofs/logs move to `Online Appendix EC.x`.
-- Target length allocation (remember `opre` <= 30 pp excl. refs, `mnsc` <= 32 pp at 1.5x, `msom` <= 32 pp ALL-INCLUSIVE + 16 pp EC, `ijoc` <= 25 pp).
+- Target length allocation (remember `opre` double-spaced 11pt 1-in margins: `<= 30` pp regular / `<= 40` pp lengthy / `<= 20` pp Focused Technical excl. refs, `<= 20` pp Context & Challenge; `mnsc` no hard cap on initial succinct submission, invited revisions `<= 32` pp at 1.5-spacing [33 lines/p] or `<= 47` pp double-spaced [25 lines/p] excl. EC; `msom` `<= 32` pp ALL-INCLUSIVE + `<= 16` pp online supplement; `ijoc` `<= 25` pp incl. refs/tables/graphs + up to `10` pp online supplement).
 - **Exemplar Section Word-Count Reference**: Record the word counts of the corresponding sections in your 2–3 exemplar papers (Abstract, Introduction, Model/Setup, Main Results, etc.) and use them as a primary calibration benchmark (`+/-15%--20%` parity).
-- **Abstract & Introduction Ceilings**: Keep the Abstract **under 270 words (`< 270` words)**, and keep the compiled **Introduction within 3 pages (`<= 3` pages)**—never let the Abstract and Introduction collapse to nearly the same length, and never let the Introduction sprawl past page 3.
+- **Abstract & Introduction Ceilings**: Enforce **`<= 200` words for `opre`**, **`<= 250` words for `mnsc`**, **`<= 300` words for `msom`** (3-part structured abstract), and **`< 270` words** generally for `ijoc` (single paragraph, zero math/citations), while keeping the compiled **Introduction within 3 pages (`<= 3` pages)**—never let the Abstract and Introduction collapse to nearly the same length, and never let the Introduction sprawl past page 3.
 
 ### Layer 2: Paragraph-by-Paragraph Role Blueprint
 Build a compact blueprint mapping the exemplars' argument dependency onto the user's Paper Spine (do NOT force every paragraph into an identical 5-part formula; match the passage's actual burden):
@@ -54,7 +54,7 @@ Build a compact blueprint mapping the exemplars' argument dependency onto the us
 
 ### Layer 2B: Sentence-by-Sentence Abstract Structural Blueprint
 Unlike long body sections where only paragraph-level pacing is mirrored, the **Abstract is the single best unit for strict sentence-by-sentence structural imitation (`S1 -> S2 -> ... -> Sk`)**:
-1. Extract every sentence from your primary exemplar's Abstract alongside its functional job, grammatical spine, and verb strength, while keeping total Abstract length `< 270` words and closely matched to the exemplar's Abstract word count.
+1. Extract every sentence from your primary exemplar's Abstract alongside its functional job, grammatical spine, and verb strength, while keeping total Abstract length within the target journal cap (`<= 200` words for `opre`, `<= 250` words for `mnsc`, `<= 300` words for `msom`, `< 270` words for `ijoc`) and closely matched to the exemplar's Abstract word count.
 2. Map your Paper Spine onto those exact sentence slots using original phrasing and zero copied domain text:
    - **`S1` (Setting & Tension)**: Concrete operational/economic domain and decision trade-off.
    - **`S2` (Bottleneck / Gap)**: Specific analytical, identification, or computational obstacle breaking standard benchmarks.
@@ -81,7 +81,7 @@ Steal the **grammatical skeleton and rhythm**, never content phrasing:
 2. **Draft in `informs4` LaTeX**:
    - Base on [informs4-master.tex](../templates/informs4-master.tex) (`informs4` + `natbib` + `informs2014` + `booktabs` + `threeparttable`).
    - Draft the **Introduction early**, revise as the body sharpens, and lock/polish the **sentence-by-sentence Abstract LAST** against Layer 2B and the finished Introduction so zero contract drift or word-count imbalance occurs between Abstract, Intro, and Conclusion.
-   - Enforce **all 7 Iron Rules**: zero orphan symbols, Just-in-Time symbol naming, unreferenced displays unnumbered, 4-beat onboarding before unfamiliar concepts, concrete SVO + calibrated verbs, positive upfront scope (zero defensive caveats), rounded patterns in prose + 2-decimal precision in `booktabs` tables, one locked canonical term per concept (`<= 2` formal `\begin{definition}` blocks), and timeless standalone prose.
+   - Enforce **all 7 Iron Rules**: zero orphan symbols, Just-in-Time symbol naming, unreferenced displays unnumbered, 4-beat onboarding before unfamiliar concepts and front-to-back plain-English clarity in Abstract/Intro (zero unintroduced paper-specific jargon), explicit section-to-section and proposition-to-proposition storyline bridges (no stacked results), concrete SVO + calibrated verbs, positive upfront scope (zero defensive caveats), trend-first prose (`<= 1--2` headline anchors per paragraph) + 2-decimal precision in `booktabs` tables, one locked canonical term per concept (`<= 2` formal `\begin{definition}` blocks), and timeless standalone prose.
    - Enforce **100% Unified Online Appendix (`\ECSwitch`)**: Zero regular `\appendix`; draft complete proofs/helper lemmas/secondary tables cleanly under `\ECSwitch` + `\ECHead{...}` (respecting M&SOM's 16-page cap), and give every `opre`/`ijoc` headline theorem a 3–6 sentence body Proof Sketch.
 
 ---

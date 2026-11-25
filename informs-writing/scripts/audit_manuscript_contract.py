@@ -274,10 +274,57 @@ def audit_contract(
             )
         )
 
-    # 7. Exemplar Abstract / Intro word-count parity, < 270w Abstract, and <= 3p Intro budget
+    # 7. Exemplar Abstract / Intro word-count parity, journal-specific Abstract caps, and <= 3p Intro budget
     abs_wc = inventory["Abstract"]
     intro_wc = inventory["Intro"]
-    if abs_wc >= 270:
+    if journal == "opre" and abs_wc > 200:
+        findings.append(
+            ContractFinding(
+                "ERROR",
+                "AbstractLength",
+                "Abstract",
+                f"Operations Research caps the Abstract at <= 200 words (found {abs_wc}).",
+            )
+        )
+    elif journal == "mnsc" and abs_wc > 250:
+        findings.append(
+            ContractFinding(
+                "ERROR",
+                "AbstractLength",
+                "Abstract",
+                f"Management Science caps the Abstract at <= 250 words (found {abs_wc}).",
+            )
+        )
+    elif journal == "msom":
+        if abs_wc > 300:
+            findings.append(
+                ContractFinding(
+                    "ERROR",
+                    "AbstractLength",
+                    "Abstract",
+                    f"M&SOM caps the structured Abstract at <= 300 words (found {abs_wc}).",
+                )
+            )
+    elif journal == "ijoc":
+        if abs_wc > 300:
+            findings.append(
+                ContractFinding(
+                    "ERROR",
+                    "AbstractLength",
+                    "Abstract",
+                    f"IJOC caps the Abstract at <= 300 words (found {abs_wc}).",
+                )
+            )
+        elif abs_wc >= 270:
+            findings.append(
+                ContractFinding(
+                    "WARN",
+                    "AbstractLength",
+                    "Abstract",
+                    f"Abstract has {abs_wc} words (keep < 270 words target and close to your exemplar's Abstract length).",
+                )
+            )
+    elif abs_wc >= 270:
         findings.append(
             ContractFinding(
                 "WARN",
@@ -345,6 +392,8 @@ def classify_result_item(line: str, journal: str) -> tuple[str, str]:
         note = "Defer to Unified Online Appendix (\\ECSwitch -> Online Appendix EC.x)."
         if journal == "msom":
             note += " Watch M&SOM 16-page EC ceiling."
+        elif journal == "ijoc":
+            note += " Watch IJOC 10-page online supplement ceiling (appendices >2 pp. go to EC)."
         return "ONLINE_APPENDIX_EC", note
 
     if any(k in low for k in ("headline", "main theorem", "proposition 1", "main table", "baseline", "mechanism", "algorithm", "identification")) or re.search(

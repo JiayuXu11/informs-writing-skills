@@ -27,12 +27,14 @@ Use this reference to prevent and eliminate all **7 AI Writing Diseases**, rebui
 
 ---
 
-## Disease 2: Cold-Start / Context-Blind Definitions (`ERROR`)
+## Disease 2: Cold-Start Jargon, Linear Reading Friction & Unbridged Results (`ERROR`)
 
-**Diagnosis**: Treating a non-standard property, technical condition, or construct as self-explanatory before telling the reader why it exists or what it means intuitively, or dropping `\begin{theorem}` / `\begin{definition}` immediately below a section heading with zero setup.
+**Diagnosis**: Treating a paper-specific construct, algorithm label, technical condition, or theorem as self-explanatory before telling the reader why it exists or what it means intuitively—or stacking sections and consecutive `\begin{proposition}` / `\begin{theorem}` blocks without storyline transitions. A manuscript can be globally complete (defining every term back in Section 3) yet still painful to read if it drops unexplained paper-specific jargon in the **Abstract or Introduction** where human readers start.
 
 - **4-Beat Onboarding Chain**:
   `1. Motivation (Why the difficulty arises) -> 2. Plain Intuition -> 3. Formal Definition -> 4. Canonical Term`.
+- **Front-to-Back Linear Reader Friendliness (Especially Abstract & Introduction)**: Audit strictly from Sentence 1 of the Abstract through the middle of the paper assuming **zero knowledge of later sections**. In the Abstract and early Introduction, prefer plain operational English over paper-specific labels or algorithm acronyms; whenever a specialized or paper-specific term must appear for the first time, immediately ground its operational meaning in plain words right where it first appears—never force the reader to wait until Section 3 to decode a word used on page 1.
+- **No Unbridged Result Stacking**: Never drop consecutive propositions, theorems, or sections like disconnected bricks. Before each subsequent formal result, supply a brief narrative bridge explaining what the preceding result settled or left open and why this next result advances the paper's central storyline.
 - **Adjacent-Reviewer Bridge**: Explain cross-field technical objects once at first consequential use so an adjacent-subfield OR/MS referee can trust why the condition appears (see [manuscript-contract-and-reviewer-calibration.md](./manuscript-contract-and-reviewer-calibration.md)).
 
 *Bad (AI)*: "We impose cross-moment regularity $\mathbb{E}[X_t Y_t] \le \kappa \sigma_t$. Under cross-moment regularity, Algorithm 1 achieves sublinear regret."
@@ -86,7 +88,8 @@ Do NOT polish translated English word by word—extract `{Actor, Action, Object,
 3. **Participial Result Tails**: Ban `", highlighting the importance of..."`, `", underscoring..."`, `", demonstrating..."`, `", paving the way for..."`. State the result cleanly; give the implication its own sentence.
 4. **Sentence-Initial Transition Glue**: Never start sentences or paragraphs with `Moreover,`, `Furthermore,`, `Additionally,`, `Ultimately,`, `Overall,`, `In essence,`, `Indeed,`, or `That said,`. Link via object continuity (`Because`, `When`, `Unlike`).
 5. **Punctuation & Structural Tics**:
-   - **Zero Prose Em-Dashes (`---` / `—`)**: Replace with commas, parentheses, or a period. *(Carve-out: numeric en-dash ranges `2019--2023` or `1\%--2\%` pass cleanly.)*
+   - **Zero Prose Em-Dashes (`---` / `—`)**: Replace with commas, colons, or a second sentence rather than stuffing asides into parentheses. *(Carve-out: numeric en-dash ranges `2019--2023` or `1\%--2\%` pass cleanly.)*
+   - **Minimal Prose Parentheticals (No Trailing Glosses)**: Minimize parenthetical explanations in narrative prose, especially stating a point and immediately tacking on a `(...)` aside to gloss, paraphrase, or explain it (e.g., `"a threshold rule (that is, a policy that dispatches once backlog exceeds a cutoff)"` or repeated `"(i.e., ...)"` / `"(meaning ...)"` inserts). Integrate essential explanations into the main syntax with commas, a relative clause, or a short follow-up sentence, and cut redundant glosses. *(Carve-out: citations, cross-references such as `(Table 2)` or `(Online Appendix EC.1)`, first-use acronyms like `(MILP)`, math arguments, and table standard errors pass cleanly.)*
    - **Zero Colon Flourish Labels**: Ban `Key insight:`, `Takeaway:`, `Proof idea:`, `The bottom line:`, `Contribution:`. *(Carve-out: formal `Definition 1:`, math notation `$f: X \to Y$`, and M&SOM's three mandatory `\ABSTRACT` headers pass cleanly.)*
    - **Negative Parallelism & Invented Mirrors**: Ban staged `"It is not X, it is Y"` / `"not merely X, but Y"` stacks and asymmetric invented contrast pairs (`"false precision rather than genuine accuracy"`). State the positive claim directly or contrast two real terms of art.
    - **Rule-of-Three & List Inflation**: Keep three-item lists strictly for genuine distinct mechanisms or assumptions—ban decorative adjective triads (`"robust, scalable, and efficient framework"`). Never dump 5+ verb-less bullet NPs.
@@ -109,14 +112,15 @@ Do NOT polish translated English word by word—extract `{Actor, Action, Object,
 
 ---
 
-## Disease 5: Raw Decimal Dumping in Prose (`ERROR`)
+## Disease 5: Numeric Clutter & Table/Figure Transcription in Prose (`ERROR`)
 
-**Diagnosis**: Reading regression/benchmark table cells aloud inside narrative paragraphs (`"increases profit by 1.32%, cuts cost by 0.87%, and reduces stockouts by 4.19%"`).
+**Diagnosis**: Reading table cells or plotted curves aloud inside narrative paragraphs—whether via multi-decimal dumps (`"1.32%, 0.87%, 4.19%"`) OR 1-decimal point-by-point transcripts (`"narrows from 9.3 (9.3%) at L=1 to 4.4 at L=2, 2.1 at L=3, and 0.6 at L=5"`). Reviewers inspect tables and figures directly for exact numbers; reciting every tick mark and raw-plus-percent pair in prose buries the insight.
 
-- **Harmonized INFORMS Rule (Pattern Prose + Table Precision)**: Narrative prose in the Abstract, Introduction, and Results communicates **causal/economic mechanisms, named benchmarks, and clean rounded orders of magnitude or ranges** (`roughly 1%--2%`, `nearly a third`, `cuts solve time roughly threefold`), citing specific papers/counts instead of vague gestures (`"various studies"`). Keep exact 2–3 decimal point estimates and standard errors inside `booktabs` tables! *(Carve-out: `p = 0.012` / $\alpha$-cutoffs `0.05` and section numbers `Section 3.2` pass cleanly.)*
+- **Trend-First, Sparse-Anchor Rule**: In Results and Numerical Study prose, focus on **qualitative direction, monotonicity, regime crossovers, and the underlying operational mechanism**. Keep exact point estimates, intermediate parameter-grid readouts, and raw-plus-percentage pairs inside `booktabs` tables and figures.
+- **Prose Number Budget (`<= 1--2` Headline Anchors per Paragraph)**: Even rounded or 1-decimal numbers should be used sparingly—include at most one or two headline magnitudes or multiples per paragraph (`roughly fourfold`, `up to ~20%`) only when scale sharpens the claim. Drop intermediate grid values and avoid repeating baseline parameter settings already listed in the setup or caption. *(Carve-out: `p = 0.012` / $\alpha$-cutoffs `0.05` and section/table labels `Section 3.2` pass cleanly.)*
 
-*Bad (AI)*: "Our policy increases profit by 1.32% under low volatility, 2.47% under medium volatility, and 4.83% under high volatility."
-*Good (Human)*: "The profit advantage of the adaptive policy scales steeply with demand volatility, rising from roughly 1%--2% in stable regimes to nearly 5% under high volatility (Table 2)."
+*Bad (AI)*: "Raising $L$ from 1 to 5 causes BS's excess cost to jump from 5.1 (5.6%) to 20.7 (+21%), while $\Delta$CO narrows from 9.3 (9.3%) at $L=1$ to 4.4 at $L=2$, 2.1 at $L=3$, and 0.6 at $L=5$."
+*Good (Human)*: "As lead time grows relative to shelf life, the age-blind base-stock benchmark deteriorates sharply because inventory position ignores lead-time outdating, whereas the value of state feedback over open-loop control steadily compresses until the two policies nearly converge (Table 2, Figure 3a)."
 
 ---
 

@@ -61,9 +61,15 @@ Do NOT force every paragraph into a mechanical `"Topic Sentence -> 3 Bullets -> 
 
 Depending on local burden, **Claim-first**, **Result-first**, **Definition-first**, **Evidence-first**, and **Contrast-first** orders are all legitimate. Close a paragraph cleanly once its burden is discharged—avoid artificial forward teasers before an obvious next heading.
 
-### Two Quick Structural Stress Tests (`conorbronsdon` + `or-ms-writing`)
-1. **Paragraph-Reshuffle Immunity Test**: Try mentally swapping two body paragraphs. If nothing breaks, the section reads like an unordered list rather than a dependency chain; establish what prerequisite each earlier paragraph supplies to the next.
+### Storyline Continuity: Section-to-Section & Proposition-to-Proposition Bridges
+A human reader experiences a paper as one continuous argument, not a stack of modular proofs or tables:
+- **Section-to-Section Bridges**: Open each major section (after Introduction) with 1–3 sentences anchoring it to the paper's storyline—briefly recalling what the prior section established, naming the obstacle or question that remains open, and stating how this section resolves the next step. Avoid mechanical itinerary lists (`"We first present Proposition 1, then Proposition 2..."`); link via analytical dependency instead (`"Section 3 established the full-information benchmark; we next examine how censored feedback distorts that policy..."`).
+- **Proposition-to-Proposition Bridges (Anti-Result-Dumping)**: Never slap down `Proposition 1`, `Proposition 2`, `Theorem 1` consecutively as isolated results. Between any two formal results (or major empirical tables), write a concise narrative bridge answering: *(1) what the previous result just resolved or exposed as a bottleneck*, *(2) why we need the next proposition to advance the paper's storyline*, and *(3) what structural or managerial question it settles*.
+
+### Three Quick Structural & Reader-Experience Stress Tests (`conorbronsdon` + `or-ms-writing`)
+1. **Paragraph-Reshuffle Immunity Test**: Try mentally swapping two body paragraphs (or two propositions). If nothing breaks, the section reads like an unordered list rather than a dependency chain; build explicit analytical bridges showing what prerequisite each earlier step supplies to the next.
 2. **Treadmill / Information-Density Test**: If a paragraph restates an earlier claim in fresher adjectives without adding a new assumption, warrant, magnitude, mechanism, or boundary, cut it.
+3. **Front-to-Back Linear Reading Test (Abstract -> Intro -> Mid-Paper)**: Read strictly from Sentence 1 of the Abstract through the middle of the paper pretending you have **zero knowledge of later sections**. Flag any paper-specific label, algorithm acronym, or niche technical term that appears before its plain-English operational meaning is explained—even if it is formally defined later in Section 3 or 4. In the Abstract and early Introduction, replace paper-specific jargon with plain operational language or immediately ground the term at first mention.
 
 ---
 
